@@ -3,20 +3,174 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+Introduction of package ClusterR.
+Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/vignettes/the_clusterR_package.html.
+
+
+---> dataset sintetici 2d per visualizzazioni 
+  punti generati da gaussiane
+  punti generati da PCA di un dataset grande -> proteine? 
+  
+  
+  
+
+-  Introduzione al clustering (cos'è, immagini d'esempio, esempi di applicazione)
+-  Descrizione dei tipi di clustering 
+-       Connectivity based
+-       Centroid based
+-       Distribution based
+-       Density based
+-  Clustering supportati da ClusterR (centroid based, distribution based)
+-  Centroid based clustering (k-means, mini-batch-kmeans, k-medoids)
+-       k-means basic usage - KMeans_rcpp
+-       variare il numero di k - immagini per diversi k
+-       optimal k - Optimal_Clusters_KMeans 
+-       visualizzare la bonta del clustering - Silouhette plot
+-       misura del tempo di esecuzione - large dataset - KMeans_rcpp vs KMeans_arma vs mini-batck KMeans
+-       medoids vs centroids - Cluster_Medoids
+-       misura del tempo di esecuzione - Cluster_Medoids vs Clara_Medoids
+-  Distribution based clustering
+-       Gaussian Mixture Models Optimal_Clusters_GMM 
+-       visualizzazione 2d gaussiane
+-  Distribution vs Centroid
+-       differenze clustering usando i dataset sintetici
+-       external_validation per validazione con true label 
+-
+-
+-
+-
+-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```{r}
-1+2
+library(ClusterR)
 ```
 
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
 ```{r}
-plot(cars)
+data(dietary_survey_IBS)
+dietary_survey_IBS
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+```{r}
+X = dietary_survey_IBS[, -ncol(dietary_survey_IBS)]   # data (excluding the response variable)
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+y = dietary_survey_IBS[, ncol(dietary_survey_IBS)]    # the response variable
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+dat = center_scale(X, mean_center = T, sd_scale = T)  # centering and scaling the data
+
+head(dat)
+```
+
+```{r}
+gmm = GMM(dat, 2, dist_mode = "maha_dist", seed_mode = "random_subset", km_iter = 10,
+          em_iter = 10, verbose = F)          
+
+# predict centroids, covariance matrix and weights
+pr = predict(gmm, newdata = dat)
+```
+
+
+```{r}
+opt_gmm = Optimal_Clusters_GMM(dat, max_clusters = 10, criterion = "BIC",  dist_mode = "maha_dist", seed_mode = "random_subset", km_iter = 10, em_iter = 10, var_floor = 1e-10, plot_data = T)
+```
+
+
+```{r}
+res = external_validation(dietary_survey_IBS$class, pr, 
+                          method = "adjusted_rand_index", summary_stats = T)
+
+res
+```
+```{r}
+pca_dat = stats::princomp(dat)$scores[, 1:2]
+
+km = KMeans_arma(pca_dat, clusters = 2, n_iter = 10, seed_mode = "random_subset", 
+                 
+                 verbose = T, CENTROIDS = NULL)
+
+pr = predict_KMeans(pca_dat, km)
+
+table(dietary_survey_IBS$class, pr)
+
+class(km) = 'matrix'
+
+plot_2d(data = pca_dat, clusters = as.vector(pr), centroids_medoids = as.matrix(km))
+```
+```{r}
+library(OpenImageR)
+
+im = readImage('elephant.png')
+
+# first resize the image to reduce the dimensions
+im = resizeImage(im, 75, 75, method = 'bilinear')            
+
+imageShow(im) 
+```
+
+
+
+
+
+
+```{r}
+data(mushroom)
+
+X = mushroom[, -1]
+
+y = as.numeric(mushroom[, 1])            # convert the labels to numeric
+
+gwd = FD::gowdis(X)           # calculate the 'gower' distance for the factor variables
+
+gwd_mat = as.matrix(gwd)                 # convert the distances to a matrix
+
+cm = Cluster_Medoids(gwd_mat, clusters = 2, swap_phase = TRUE, verbose = F)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
