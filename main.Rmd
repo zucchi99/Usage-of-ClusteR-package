@@ -20,6 +20,7 @@ Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/v
 -       Centroid based
 -       Distribution based
 -       Density based
+-  Dataset di esempio della libreria
 -  Clustering supportati da ClusterR (centroid based, distribution based)
 -  Centroid based clustering (k-means, mini-batch-kmeans, k-medoids)
 -       k-means basic usage - KMeans_rcpp
@@ -35,11 +36,8 @@ Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/v
 -  Distribution vs Centroid
 -       differenze clustering usando i dataset sintetici
 -       external_validation per validazione con true label 
--
--
--
--
--
+-  (optional) paragone ClusteR vs ClusterR
+
 
 
 
