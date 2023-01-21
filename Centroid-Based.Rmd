@@ -1,0 +1,72 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+## Centroid based clustering
+
+-   k-means basic usage - KMeans_rcpp
+-   variare il numero di k - immagini per diversi k
+-   optimal k - Optimal_Clusters_KMeans
+-   visualizzare la bonta del clustering - Silouhette plot
+-   misura del tempo di esecuzione - large dataset - KMeans_rcpp vs
+    KMeans_arma vs mini-batck KMeans
+-   medoids vs centroids - Cluster_Medoids
+-   misura del tempo di esecuzione - Cluster_Medoids vs Clara_Medoids
+
+### K-means
+
+K-means clustering is one of the main approaches for clustering and aims
+to partition n observations into k clusters in which each observation
+belongs to the cluster with the nearest mean. The most common algorithm
+uses an iterative refinement technique.
+
+Thanks to its simplicity and adaptidivity, it is widely used. Two main
+cons can be found:
+
+-   k is a fixed parameter at start $\rightarrow$ the number of clusters
+    is fixed
+-   is sensible to noise
+    -   the center of each centroid is the mean of its point
+    -   to avoid this problem we will se later on the K-medioids, that
+        instead uses as center the median point of each cluster
+
+Is it possible to deduct dinamically from the data the optimal choice
+for k? Yes, we have to:
+
+1.  execute many times the K-means with a range of different k.
+2.  define a metric $f$ to compare different k
+3.  choose $k = \{ \; k_{i} \; : \; min(f(k_{i})) \; \}$.
+
+Note that there is a trade-off inside $f$ between:
+
+-   the number of clusters
+-   the mean distance of each point to its centroid
+
+Our goal would to minimize both of them but decreasing one brings to an
+increment of the other.
+
+The ClusterR package provides two different k-means functions, the
+KMeans_arma, which is an R implementation of the k-means armadillo
+library and the KMeans_rcpp which uses the RcppArmadillo package. Both
+functions come to the same output results, however, they return
+different features which I'll explain in the next code chunks.
+
+KMeans_arma
+
+The KMeans_arma is faster than the KMeans_rcpp function, however, it
+initially outputs only the centroids for a specific number of clusters.
+Furthermore, the number of columns of the data should be larger than the
+number of clusters, otherwise, it raises an error. The clustering will
+run faster on multi-core machines when OpenMP is enabled (eg. -fopenmp
+in GCC). The algorithm is initialized once and 10 iterations are
+typically sufficient for convergence. The initial centroids are seeded
+using one of keep_existing, static_subset, random_subset, static_spread
+and random_spread. If the seed_mode equals to keep_existing then the
+user should supply a matrix of centroids.
+
+```{r}
+
+
+```
