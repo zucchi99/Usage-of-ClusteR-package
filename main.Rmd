@@ -41,11 +41,45 @@ Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/v
 
 
 
+```{r}
+
+
+# load library MASS
+library(MASS)
+library(dplyr)
+
+load_factor = 1000
+
+#coeff = log(base=10, load_factor)/2    #choose if augmenting distance when generating more points
+coeff = 1
+  
+# create bivariate normal distribution
+df1 = bind_rows(list(
+  data.frame(mvrnorm(n = 10 * load_factor, mu = c(5*coeff, 5*coeff), Sigma = matrix(c(1, -.6, 0, 1), ncol = 2)), color="red"),
+  data.frame(mvrnorm(n = 10 * load_factor, mu = c(0*coeff, 0*coeff), Sigma = matrix(c(.8, 0, 0, 4), ncol = 2)), color="green"),
+  data.frame(mvrnorm(n = 15 * load_factor, mu = c(3*coeff, 1*coeff), Sigma = matrix(c(3, .7, 0, 2), ncol = 2)), color="blue")
+))
+
+plot(x=df1$X1, y=df1$X2, col=df1$color)
+points(c(5*coeff), c(5*coeff), pch="R", cex=2)
+points(c(0*coeff), c(0*coeff), pch="G", cex=2)
+points(c(3*coeff), c(1*coeff), pch="B", cex=2)
+
+```
 
 
 
 
 
+
+
+```{r}
+
+
+
+
+
+```
 
 
 
