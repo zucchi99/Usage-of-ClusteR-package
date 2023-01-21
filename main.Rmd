@@ -47,23 +47,25 @@ Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/v
 # load library MASS
 library(MASS)
 library(dplyr)
+library(ClusterR)
 
-load_factor = 1000
+load_factor = 100
+ncol=2
 
-#coeff = log(base=10, load_factor)/2    #choose if augmenting distance when generating more points
-coeff = 1
+coeff = log(base=10, load_factor)/2    #choose if augmenting distance when generating more points
+#coeff = 1
   
 # create bivariate normal distribution
 df1 = bind_rows(list(
-  data.frame(mvrnorm(n = 10 * load_factor, mu = c(5*coeff, 5*coeff), Sigma = matrix(c(1, -.6, 0, 1), ncol = 2)), color="red"),
-  data.frame(mvrnorm(n = 10 * load_factor, mu = c(0*coeff, 0*coeff), Sigma = matrix(c(.8, 0, 0, 4), ncol = 2)), color="green"),
-  data.frame(mvrnorm(n = 15 * load_factor, mu = c(3*coeff, 1*coeff), Sigma = matrix(c(3, .7, 0, 2), ncol = 2)), color="blue")
+  data.frame(mvrnorm(n = 10 * load_factor, mu = c(5*coeff, 5*coeff), Sigma = matrix(c(1, -.6, 0, 1), ncol = 2)), color=1),
+  data.frame(mvrnorm(n = 10 * load_factor, mu = c(0*coeff, 0*coeff), Sigma = matrix(c(.8, 0, 0, 4), ncol = 2)), color=2),
+  data.frame(mvrnorm(n = 15 * load_factor, mu = c(3*coeff, 1*coeff), Sigma = matrix(c(3, .7, 0, 2), ncol = 2)), color=3)
 ))
 
 plot(x=df1$X1, y=df1$X2, col=df1$color)
-points(c(5*coeff), c(5*coeff), pch="R", cex=2)
-points(c(0*coeff), c(0*coeff), pch="G", cex=2)
-points(c(3*coeff), c(1*coeff), pch="B", cex=2)
+points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="brown")
+points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="brown")
+points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="brown")
 
 ```
 
@@ -75,118 +77,205 @@ points(c(3*coeff), c(1*coeff), pch="B", cex=2)
 
 ```{r}
 
-
-
-
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-library(ClusterR)
-```
-
-
-```{r}
-data(dietary_survey_IBS)
-dietary_survey_IBS
-```
-
-```{r}
-X = dietary_survey_IBS[, -ncol(dietary_survey_IBS)]   # data (excluding the response variable)
-
-y = dietary_survey_IBS[, ncol(dietary_survey_IBS)]    # the response variable
-
-dat = center_scale(X, mean_center = T, sd_scale = T)  # centering and scaling the data
-
-head(dat)
-```
-
-```{r}
-gmm = GMM(dat, 2, dist_mode = "maha_dist", seed_mode = "random_subset", km_iter = 10,
-          em_iter = 10, verbose = F)          
+x = subset(df, select=-c(color))
+gmm_3 = GMM(x, 3, dist_mode = "maha_dist", seed_mode = "random_subset")          
 
 # predict centroids, covariance matrix and weights
-pr = predict(gmm, newdata = dat)
+df1["color_pred_3"] = predict(gmm_3, newdata = x)
+
+plot(x=df1$X1, y=df1$X2, col=df1$color_pred_3 + 1)
+points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="black")
+points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="black")
+points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="black")
+points(gmm_3$centroids, pch="X", cex=2, col="azure")
+
 ```
 
 
 ```{r}
-opt_gmm = Optimal_Clusters_GMM(dat, max_clusters = 10, criterion = "BIC",  dist_mode = "maha_dist", seed_mode = "random_subset", km_iter = 10, em_iter = 10, var_floor = 1e-10, plot_data = T)
+plot_2d(data = x, clusters = df1$color_pred_3, centroids_medoids = gmm_3$centroids)
 ```
-
-
-```{r}
-res = external_validation(dietary_survey_IBS$class, pr, 
-                          method = "adjusted_rand_index", summary_stats = T)
-
-res
-```
-```{r}
-pca_dat = stats::princomp(dat)$scores[, 1:2]
-
-km = KMeans_arma(pca_dat, clusters = 2, n_iter = 10, seed_mode = "random_subset", 
-                 
-                 verbose = T, CENTROIDS = NULL)
-
-pr = predict_KMeans(pca_dat, km)
-
-table(dietary_survey_IBS$class, pr)
-
-class(km) = 'matrix'
-
-plot_2d(data = pca_dat, clusters = as.vector(pr), centroids_medoids = as.matrix(km))
-```
-```{r}
-library(OpenImageR)
-
-im = readImage('elephant.png')
-
-# first resize the image to reduce the dimensions
-im = resizeImage(im, 75, 75, method = 'bilinear')            
-
-imageShow(im) 
-```
-
 
 
 
 
 
 ```{r}
-data(mushroom)
-
-X = mushroom[, -1]
-
-y = as.numeric(mushroom[, 1])            # convert the labels to numeric
-
-gwd = FD::gowdis(X)           # calculate the 'gower' distance for the factor variables
-
-gwd_mat = as.matrix(gwd)                 # convert the distances to a matrix
-
-cm = Cluster_Medoids(gwd_mat, clusters = 2, swap_phase = TRUE, verbose = F)
+external_validation(df1$color, df1$color_pred_3, summary_stats = T)
+external_validation(df1$color, df1$color_pred_2, summary_stats = T)
 ```
+
+
+
+
+```{r}
+
+x = subset(df, select=-c(color))
+gmm_2 = GMM(x, 2, dist_mode = "maha_dist", seed_mode = "random_subset")          
+
+# predict centroids, covariance matrix and weights
+df1["color_pred_2"] = predict(gmm_2, newdata = x)
+
+plot(x=df1$X1, y=df1$X2, col=df1$color_pred_2 + 1)
+points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="black")
+points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="black")
+points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="black")
+points(gmm_2$centroids, pch="X", cex=2, col="azure")
+
+```
+
+```{r}
+plot_2d(data = x, clusters = df1$color_pred_2, centroids_medoids = gmm_2$centroids)
+
+help(plot_2d)
+```
+
+
+
+
+```{r}
+gmm_3$centroids
+gmm_3$covariance_matrices
+head(gmm_3$Log_likelihood)
+```
+
+
+
+```{r}
+
+x = subset(df, select=-c(color))
+opt_gmm = Optimal_Clusters_GMM(x, max_clusters = 10, criterion = "BIC", 
+                               dist_mode = "eucl_dist", seed_mode = "random_subset",
+                               plot_data = T)      
+
+
+help(Optimal_Clusters_GMM)
+
+```
+
+
+
+
+
+```{r}
+
+help(Silhouette_Dissimilarity_Plot)
+
+data(soybean)
+
+dat = soybean[, -ncol(soybean)]
+
+cm = Cluster_Medoids(dat, clusters = 5, distance_metric = 'jaccard_coefficient')
+
+plt_sd = Silhouette_Dissimilarity_Plot(cm, silhouette = TRUE)
+```
+
+
+
+
+In the package ClusterR there are 3 different datasets: 
+-   dietary_survey_IBS: Synthetic data using a dietary survey of patients with irritable bowel syndrome. 
+-   mushroom: The mushroom data
+-   soybean: The soybean (large) data set from the UCI repository
+
+
+*dietary_survey_IBS* contains synthetic data generated using the mean and standard deviation of data used in the paper "A dietary survey of patients with irritable bowel syndrome".
+
+```{r}
+help(dietary_survey_IBS)
+```
+
+It contains 400 rows and 43 columns. 
+
+"class" is the target column. Its values are O and 1, with 0 meaning healty and 1 meaning IBS-positive. 
+
+The other 42 columns are numeric and can be used as predictors. 
+
+
+```{r}
+dim(dietary_survey_IBS)
+
+colnames(dietary_survey_IBS)
+
+unique(dietary_survey_IBS$class)
+
+head(dietary_survey_IBS)
+```
+
+In the following a 2d PCA for the entire dataset: black for class 0 (healty) and red for class 1 (positive). 
+
+```{r}
+
+pca_dat = stats::princomp(dietary_survey_IBS)$scores[, 1:2]
+plot(pca_dat, col=dietary_survey_IBS$class + 1)
+
+```
+
+
+
+
+
+```{r}
+help(dietary_survey_IBS)
+help(mushroom)
+help(soybean)
+```
+
+
+
+
+
+*mushroom* includes descriptions of hypothetical samples corresponding to 23 species of gilled mushrooms in the Agaricus and Lepiota Family (pp. 500-525). 
+
+Each species can either be edible or poisonous. The Guide clearly states that there is no simple rule for determining the edibility of a mushroom; no rule like 'leaflets three, let it be' for Poisonous Oak and Ivy. For simplicity the unknown targets are marked as poisounous. 
+
+
+```{r}
+help(mushroom)
+```
+
+It contains 8124 rows and 23 columns. 
+
+"class" is the target column. Its values are "p" and "e", with "p" meaning poisounous (or unknown) and e meaning "edible". 
+
+The other 22 columns contain one character each and can be used as predictors. 
+
+
+```{r}
+dim(mushroom)
+
+colnames(mushroom)
+
+unique(mushroom$class)
+
+head(mushroom)
+```
+
+In the following a 2d PCA for the entire dataset: black for class 0 (edible) and red for class 1 (poisounous). 
+
+```{r}
+X = mushroom[1:1000, -1]
+
+y = as.numeric(mushroom[1:1000, 1])            
+
+gwd = FD::gowdis(X)           
+
+gwd_mat = as.matrix(gwd)                 
+
+pca_dat = stats::princomp(gwd_mat)$scores[, 1:2]
+plot(pca_dat, col=y)
+
+```
+
+
+
+
+
+
+
+TODO soybean dataset exploration
+
+
 
 
 
