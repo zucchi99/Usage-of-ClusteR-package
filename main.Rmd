@@ -41,6 +41,56 @@ Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/v
 
 
 
+
+
+
+
+Clustering is the task of dividing the population or data points into a number of groups such that data points in the same groups are more similar to other data points in the same group and dissimilar to the data points in other groups. It is basically a collection of objects on the basis of similarity and dissimilarity between them. 
+
+Clustering is one of the unsupervised learning methods: it means that we have no references or labeled responses. For this reason the clustering algorithms can only rely on the given data, regardless of the specific task we are trying to solve. Clustering is suitable for explaining the possible data-generating process, for finding possible relations or hierarchies between data or as a part of the exploratory data analysis.
+
+For doing clustering is necessary to define a measure of similarity: similar items should belong to the same group. A measure of similarity must be non-negative, symmetric and must have a value of zero only if the items are equal. There are various possible similarity measures, for example: euclidean distance, manhattan distance and maximum distance. A clustering library should give the possibility to specify the similarity function to be used. 
+
+There are four different types of clustering:
+-       Connectivity based
+-       Centroid based
+-       Distribution based
+-       Density based
+
+Connectivity-based clustering tries to create connections between the clusters. In this way the algorithm creates a tree (or a forest), which can give us an hierarchial view of the data. Two possible uses can be creating a cause-effect relationship between items or reconstructing a possible evolution of a population. 
+
+Centroid-based clustering is based on centroids: each item belongs to the class of its nearest centroid. The centroids can be restricted to locations of the items (medoid) or generic points (centroid). The number of centroids can be hard-coded or searched by the algorithm; the position of the centroids is optimized by the algorithm. In general it is better to have the minimum number of centroids that explains well the data (simplest model). 
+
+Distribution-based clustering uses a probabilistic model to explain the original data-generating model, by minimizing the discrepancy. By doing so, it is possible to create specific models that accurately describe the data and give an idea of the prediction confidence. A general way to describe data is by using Gaussian Mixture Models. 
+
+Density-based clustering groups data using distance between points. Dense connected regions of points should be part of the same cluster. In this way there is not a fixed number of clusters, but the number of clusters depends on how many different regions of data points are there and on the chosen density threshold. Two examples of density-based clustering algorithms are DBSCAN and OPTICS. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```{r}
 
 
