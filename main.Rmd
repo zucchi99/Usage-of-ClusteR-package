@@ -212,19 +212,6 @@ plot(pca_dat, col=dietary_survey_IBS$class + 1)
 ```
 
 
-
-
-
-```{r}
-help(dietary_survey_IBS)
-help(mushroom)
-help(soybean)
-```
-
-
-
-
-
 *mushroom* includes descriptions of hypothetical samples corresponding to 23 species of gilled mushrooms in the Agaricus and Lepiota Family (pp. 500-525). 
 
 Each species can either be edible or poisonous. The Guide clearly states that there is no simple rule for determining the edibility of a mushroom; no rule like 'leaflets three, let it be' for Poisonous Oak and Ivy. For simplicity the unknown targets are marked as poisounous. 
@@ -268,12 +255,50 @@ plot(pca_dat, col=y)
 ```
 
 
+*soybean* contains a dataset about soybeans characteristics from UCI machine learning repository. 
+
+There are both categorical and ordinal values, encoded by integers. Missing values were imputated using the mice package.
 
 
+```{r}
+help(soybean)
+```
+
+It contains 307 rows and 36 columns. 
+
+"class" is the target column. Its values are "diaporthe-stem-canker", "charcoal-rot", "rhizoctonia-root-rot", "phytophthora-rot", "brown-stem-rot", "powdery-mildew", "downy-mildew", "brown-spot", "bacterial-blight", "bacterial-pustule", "purple-seed-stain", "anthracnose", "phyllosticta-leaf-spot", "alternarialeaf-spot", "frog-eye-leaf-spot", "diaporthe-pod-&-stem-blight", "cyst-nematode", "2-4-d-injury" and "herbicide-injury". 
+
+The other 25 columns contain one integer each and can be used as predictors. 
 
 
+```{r}
+dim(soybean)
 
-TODO soybean dataset exploration
+colnames(soybean)
+
+unique(soybean$class)
+
+head(soybean)
+```
+
+In the following a 2d PCA for the entire dataset: one color for each different class. 
+
+```{r}
+
+
+X = soybean[, -1]
+
+y = as.numeric(soybean[, 1])            
+
+gwd = FD::gowdis(X)           
+
+gwd_mat = as.matrix(gwd)                 
+
+pca_dat = stats::princomp(gwd_mat)$scores[, 1:2]
+plot(pca_dat, col=y)
+
+```
+
 
 
 
