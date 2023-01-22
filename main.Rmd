@@ -51,6 +51,8 @@ Clustering is one of the unsupervised learning methods: it means that we have no
 
 For doing clustering is necessary to define a measure of similarity: similar items should belong to the same group. A measure of similarity must be non-negative, symmetric and must have a value of zero only if the items are equal. There are various possible similarity measures, for example: euclidean distance, manhattan distance and maximum distance. A clustering library should give the possibility to specify the similarity function to be used. 
 
+A predictive algorithm based on clustering may for example use the value of nearest cluster to give the response for a new data point. It is also possible to combine the informations of all clusters, weighted by the cluster distances. 
+
 There are four different types of clustering:
 -       Connectivity based
 -       Centroid based
@@ -70,8 +72,57 @@ Density-based clustering groups data using distance between points. Dense connec
 
 
 
+ClusterR is a package designed for cluster generation and analysis. It combines different clustering algorithms, along with helper functions and example datasets.
+
+The package is subdivided in different parts:
+- clustering algorithms
+- searching for optimal number of clusters of the clustering algorithms
+- prediction using the generated clusters
+- visualization of the clustering goodness using 2d scatterplots and silouhette dissimilarity plots
+- validation of the clustering goodness using ground truth labels 
+- helper methods
 
 
+```{r}
+ClusterR::center_scale
+ClusterR::plot_2d
+
+ClusterR::AP_affinity_propagation
+ClusterR::AP_preferenceRange
+ClusterR::cost_clusters_from_dissim_medoids
+ClusterR::distance_matrix
+
+ClusterR::external_validation
+
+ClusterR::Clara_Medoids
+ClusterR::Cluster_Medoids
+ClusterR::GMM
+ClusterR::KMeans_arma
+ClusterR::KMeans_rcpp
+ClusterR::MiniBatchKmeans
+
+ClusterR::Optimal_Clusters_GMM
+ClusterR::Optimal_Clusters_KMeans
+ClusterR::Optimal_Clusters_Medoids
+
+ClusterR::predict_GMM
+ClusterR::predict_KMeans
+ClusterR::predict_MBatchKMeans
+ClusterR::predict_Medoids
+
+ClusterR::Silhouette_Dissimilarity_Plot
+```
+
+
+
+
+ClusterR only supports Distribution-based and Centroid-based algorithms. 
+
+The only distribution-based algorithm in ClusterR is GMM (Gaussian Mixture Model). GMM models the data-generating process as a set of gaussian models, one for each cluster. Doing so, each gaussian (cluster) gives the probability density function of the points it generates. A point belongs to the cluster that maximized the probability of generating it there. 
+
+GMM uses generalized gaussian distributions, so each cluster has its own independent mean (centroid) and standard deviation (diagonal covariance matrix).
+
+...todo explain more about parameters and output (weights, loss)....
 
 
 
