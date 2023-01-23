@@ -126,29 +126,21 @@ GMM uses generalized gaussian distributions, so each cluster has its own indepen
 
 
 
-
-
-
 For the Centroid-based algorithms, ClusterR supports K-means and K-medoids variations. 
 
 K-means initially creates k random points which represents the centroids. Then, for each iteration, the algorithm moves the centroid positions to minimize the likelihood (?). 
 
 
 
+...todo add ? ...
 
 
 
+For testing the GMM algorithm, we have created a synthetic dataset drawn from three 2-dimensional gaussians.
 
+To do it we used the library MASS, which defines the function mvrnorm: specifying the mu (mean) and sigma (correlation matrix), along with the desidered dimensionality and number of samples, it returns a matrix representing n R^k points. Then we combined three of these matrix (one for each gaussian generating process) into a single dataframe, where the column "color" specifies the class for each point. 
 
-
-
-
-
-
-
-
-
-
+We finally visualized the points using a 2-d colored scatterplot; the digits indicate the positions of the centroids. 
 
 
 ```{r}
@@ -181,6 +173,8 @@ points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="brown")
 
 
 
+... todo first 3 gmm... 
+
 
 
 
@@ -202,20 +196,25 @@ points(gmm_3$centroids, pch="X", cex=2, col="azure")
 ```
 
 
+It is also possible to use the *plot_2d* function, defined by by the ClusterR package, for a 2-d visualization of the predicted points along with the centroid/medoid positions. 
+
+
 ```{r}
 plot_2d(data = x, clusters = df1$color_pred_3, centroids_medoids = gmm_3$centroids)
 ```
 
-
-
+The function *external_validation*, also defined in the ClusterR package, gives us the possibility to extract some useful metrics measuring the goodness of the fit. It requires only the predicted values and annotated values. 
 
 
 ```{r}
+
 external_validation(df1$color, df1$color_pred_3, summary_stats = T)
 external_validation(df1$color, df1$color_pred_2, summary_stats = T)
 ```
 
 
+...todo Since it is possible to specify the number of clusters, we tried running the GMM algorithm specifying gaussian_comps=2. 
+....
 
 
 ```{r}
