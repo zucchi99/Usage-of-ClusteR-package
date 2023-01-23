@@ -120,19 +120,13 @@ ClusterR only supports Distribution-based and Centroid-based algorithms.
 
 The only distribution-based algorithm in ClusterR is GMM (Gaussian Mixture Model). GMM models the data-generating process as a set of gaussian models, one for each cluster. Doing so, each gaussian (cluster) gives the probability density function of the points it generates. A point belongs to the cluster that maximized the probability of generating it there. 
 
-GMM uses generalized gaussian distributions, so each cluster has its own independent mean (centroid) and standard deviation (diagonal covariance matrix).
-
-...todo explain more about parameters and output (weights, loss)....
+GMM uses generalized gaussian distributions, so each cluster has its own independent mean (centroid) and variance (diagonal covariance matrix).
 
 
 
 For the Centroid-based algorithms, ClusterR supports K-means and K-medoids variations. 
 
-K-means initially creates k random points which represents the centroids. Then, for each iteration, the algorithm moves the centroid positions to minimize the likelihood (?). 
-
-
-
-...todo add ? ...
+K-means initially creates k random points which represents the centroids. Then, for each iteration, the algorithm moves the centroid positions to optimize the clustering. The k-medoid algorithms are a variation of k-means, which add the constraint that the centroids must be placed over the item positions. 
 
 
 
@@ -173,14 +167,22 @@ points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="brown")
 
 
 
-... todo first 3 gmm... 
+The function given by the library to compute Gaussian Mixture Models (GMM) is GMM. 
+It takes two compulsory arguments: the matrix specifying the item positions (one row for each item, one column for each component) and the number of gaussian processes. 
 
-
+The other parameters are:
+- dist_mode: specifies if the training algorithm should use euclidean or manhattan distance
+- seed mode: specifies the initial placement of the centroids for the iterative algorithm (static/random subset/spread)
+- number of iterations for the k-means algorithm
+- number of iterations for the expectation-maximization algorithm
+- smallest possible values for diagonal covariances
+- seed for random number generator (to make the experiment replicable)
+- whether or not to plot the results in a graphical form
+- verbosity
 
 
 
 ```{r}
-
 x = subset(df1, select=c(X1, X2))
 gmm_3 = GMM(x, 3, dist_mode = "maha_dist", seed_mode = "random_subset")          
 
@@ -198,6 +200,11 @@ points(gmm_3$centroids, pch="X", cex=2, col="azure")
 
 It is also possible to use the *plot_2d* function, defined by by the ClusterR package, for a 2-d visualization of the predicted points along with the centroid/medoid positions. 
 
+The arguments are:
+- data, 2-dimensional matrix specifying the item positions
+- clusters, a list specifying the class for each item (numeric vector)
+- centroids_medoids, the position of the centroids (or medoids)
+
 
 ```{r}
 plot_2d(data = x, clusters = df1$color_pred_3, centroids_medoids = gmm_3$centroids)
@@ -205,16 +212,22 @@ plot_2d(data = x, clusters = df1$color_pred_3, centroids_medoids = gmm_3$centroi
 
 The function *external_validation*, also defined in the ClusterR package, gives us the possibility to extract some useful metrics measuring the goodness of the fit. It requires only the predicted values and annotated values. 
 
+The arguments are:
+- true_labels: the annotated values
+- clusters: the predicted values
+- method for calculating the goodness (the value returned by the function. although the function shows all the measures in the log)
+- summary_stats: whether or not to print summary statistics like sensitivity and specificity
+
 
 ```{r}
 external_validation(df1$color, df1$color_pred_3, summary_stats = T)
 ```
 
 The GMM object has 4 attributes: 
-- centroids, a matrix that specifies the position of one centroid per row
-- covariance_matrices, a matrix that specifies one diagonal covariance matrix per row
+- centroids: a matrix that specifies the position of one centroid per row
+- covariance_matrices: a matrix that specifies one diagonal covariance matrix per row
 - weights, for each gaussian component (list)
-- Log_likelihood, a matrix one row for each training item and one column for each component
+- Log_likelihood: a matrix one row for each training item and one column for each component
 
 ```{r}
 gmm_3$centroids
@@ -261,7 +274,7 @@ The other parameters are:
 - number of iterations for the expectation-maximization algorithm
 - smallest possible values for diagonal covariances
 - seed for random number generator (to make the experiment replicable)
-- wheter or not to plot the results in a graphical form
+- whether or not to plot the results in a graphical form
 - verbosity
 
 In the output we can see that a model with 3 clusters should be fine, because after this value the BIC stops increasing sharply. Models with a lot of clusters have a even lower value for BIC but may be too complex. This shows why it is important to watch also the clustering results using a scatterplot, if possible. 
@@ -280,32 +293,93 @@ opt_gmm = Optimal_Clusters_GMM(x, max_clusters = 10, criterion = "BIC",
 
 
 
+ClusterR::Clara_Medoids
+ClusterR::Cluster_Medoids
+ClusterR::KMeans_arma
+ClusterR::KMeans_rcpp
+ClusterR::MiniBatchKmeans
+
+
+ClusterR supports k-means algorithm with two different implementations: KMeans_arma and KMeans_rcpp.
+The difference is that KMeans_rcpp:
+- allows for the specification of the initial centroid positions and other initialization methods
+- the running time and convergence can be set by the user
+- the num_init parameter
+KMeans_arma is faster than KMeans_rcpp. 
+
+
+Their interface is similar to GMM, but specific for k-means task. The arguments for KMeans_rcpp are:
+- data: a matrix specifying the item positions (items on rows, components on columns)
+- clusters: the number of clusters
+- num_init: how many times to run the algorithm with different initializations. If >1, the function returns the best clustering by within-cluster-sum-of-squared-error
+- max_iters: max number of iterations
+- initializer: how to initialize the centroids (optimal_init, quantile_init, kmeans++, random)
+- fuzzy: if true, the prediction probabilities are proportional to the distances to the centroids
+- CENTROIDS: a matrix specifying the initial positions (one row per centroid, one column per component)
+- tol: tolerance for convergence
+- tol_optimal_init: tolerance value when using the "optimal_init" initializer (higher means further inital positions)
+- seed of the RNG (for reproducibility)
+- verbosity
+
+
+In the following the result of k-means clustering with k=3 and KMeans_rcpp implementation. 
+
+
+```{r}
+
+help(KMeans_arma)
+
+x = subset(df1, select=c(X1, X2))
+kmeans_rcpp = KMeans_rcpp(x, 3)          
+
+# predict centroids, covariance matrix and weights
+df1["color_pred_kmeans_3"] = predict(kmeans_rcpp, newdata = x)
+
+plot(x=df1$X1, y=df1$X2, col=df1$color_pred_kmeans_3 + 1)
+points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="black")
+points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="black")
+points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="black")
+points(kmeans_rcpp$centroids, pch="X", cex=2, col="azure")
+
+```
+
+
+
+... todo comparison of running time between rcpp and arma...
 
 
 
 
+The k-medoid variations are supported by the implementations Cluster_Medoids and Clara_Medoids. 
+
+... todo cluster/clara documentation...
+... todo cluster vs kmeans for very small datasets (cluster should place centroids on items)... 
 
 
 
+```{r}
+
+x = subset(df1, select=c(X1, X2))
+cluster_med = KMeans_rcpp(x, 3)          
+
+# predict centroids, covariance matrix and weights
+df1["color_pred_cluster_3"] = predict(kmeans_rcpp, newdata = x)
+
+plot(x=df1$X1, y=df1$X2, col=df1$color_pred_cluster_3 + 1)
+points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="black")
+points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="black")
+points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="black")
+points(cluster_med$centroids, pch="X", cex=2, col="azure")
+
+```
 
 
 
+... todo batch kmeans (doc, running time for large datasets)...
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+...todo silouhette plot for kmeans... 
 
 
 ```{r}
@@ -320,6 +394,9 @@ cm = Cluster_Medoids(dat, clusters = 5, distance_metric = 'jaccard_coefficient')
 
 plt_sd = Silhouette_Dissimilarity_Plot(cm, silhouette = TRUE)
 ```
+
+
+
 
 
 
@@ -453,6 +530,7 @@ plot(pca_dat, col=y)
 
 
 
+...todo test clustering on datasets...
 
 
 
