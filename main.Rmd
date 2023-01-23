@@ -181,7 +181,7 @@ points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="brown")
 
 ```{r}
 
-x = subset(df1, select=-c(color))
+x = subset(df1, select=c(X1, X2))
 gmm_3 = GMM(x, 3, dist_mode = "maha_dist", seed_mode = "random_subset")          
 
 # predict centroids, covariance matrix and weights
@@ -207,19 +207,30 @@ The function *external_validation*, also defined in the ClusterR package, gives 
 
 
 ```{r}
-
 external_validation(df1$color, df1$color_pred_3, summary_stats = T)
-external_validation(df1$color, df1$color_pred_2, summary_stats = T)
 ```
 
+The GMM object has 4 attributes: 
+- centroids, a matrix that specifies the position of one centroid per row
+- covariance_matrices, a matrix that specifies one diagonal covariance matrix per row
+- weights, for each gaussian component (list)
+- Log_likelihood, a matrix one row for each training item and one column for each component
 
-...todo Since it is possible to specify the number of clusters, we tried running the GMM algorithm specifying gaussian_comps=2. 
-....
+```{r}
+gmm_3$centroids
+gmm_3$covariance_matrices
+gmm_3$weights
+head(gmm_3$Log_likelihood)
+```
+
+Since it is possible to specify the number of clusters, we tried running the GMM algorithm specifying gaussian_comps=2. 
+
+We can see that the clustering still makes sense, even if the external validation statistics are worse. One of the centroids remains on the cluster nr.1, while the other centroid is in the middle of clusters 2 and 3. 
 
 
 ```{r}
 
-x = subset(df, select=-c(color))
+x = subset(df1, select=c(X1, X2))
 gmm_2 = GMM(x, 2, dist_mode = "maha_dist", seed_mode = "random_subset")          
 
 # predict centroids, covariance matrix and weights
@@ -231,36 +242,67 @@ points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="black")
 points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="black")
 points(gmm_2$centroids, pch="X", cex=2, col="azure")
 
-```
+external_validation(df1$color, df1$color_pred_2, summary_stats = T)
 
-```{r}
-plot_2d(data = x, clusters = df1$color_pred_2, centroids_medoids = gmm_2$centroids)
-
-help(plot_2d)
 ```
 
 
 
+How to find the optimal number of centroids? 
+Doing so by plotting the data with colors only works for small datasets representable in two dimensions. 
+The function Optimal_Clusters_GMM calculates the goodness of the fit for each # of clusters between 1 and max_clusters. 
+
+The criterion can be AIC (Alkaine Information Criterion) or BIC (Bayes Information Criterion). A rule of thumb is that we should select the smallest (simplest) model with good performances, so the best model should be the one which minimized one of these criterions. 
+
+The other parameters are:
+- dist_mode: specifies if the training algorithm should use euclidean or manhattan distance
+- seed mode: specifies the initial placement of the centroids for the iterative algorithm (static/random subset/spread)
+- number of iterations for the k-means algorithm
+- number of iterations for the expectation-maximization algorithm
+- smallest possible values for diagonal covariances
+- seed for random number generator (to make the experiment replicable)
+- wheter or not to plot the results in a graphical form
+- verbosity
+
+In the output we can see that a model with 3 clusters should be fine, because after this value the BIC stops increasing sharply. Models with a lot of clusters have a even lower value for BIC but may be too complex. This shows why it is important to watch also the clustering results using a scatterplot, if possible. 
+
+
 
 ```{r}
-gmm_3$centroids
-gmm_3$covariance_matrices
-head(gmm_3$Log_likelihood)
-```
 
-
-
-```{r}
-
-x = subset(df, select=-c(color))
+x = subset(df1, select=c(X1, X2))
 opt_gmm = Optimal_Clusters_GMM(x, max_clusters = 10, criterion = "BIC", 
                                dist_mode = "eucl_dist", seed_mode = "random_subset",
                                plot_data = T)      
 
-
-help(Optimal_Clusters_GMM)
-
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
