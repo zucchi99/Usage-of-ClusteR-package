@@ -293,13 +293,6 @@ opt_gmm = Optimal_Clusters_GMM(x, max_clusters = 10, criterion = "BIC",
 
 
 
-ClusterR::Clara_Medoids
-ClusterR::Cluster_Medoids
-ClusterR::KMeans_arma
-ClusterR::KMeans_rcpp
-ClusterR::MiniBatchKmeans
-
-
 ClusterR supports k-means algorithm with two different implementations: KMeans_arma and KMeans_rcpp.
 The difference is that KMeans_rcpp:
 - allows for the specification of the initial centroid positions and other initialization methods
