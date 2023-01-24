@@ -1,4 +1,6 @@
 library(OpenImageR)
+library(ClusterR)
+library(imager)
 
 # read image
 im = readImage('images/elephant.jpg')
@@ -7,14 +9,26 @@ im = readImage('images/elephant.jpg')
 imageShow(im)
 
 # first resize the image to reduce the dimensions
-im_res = resizeImage(im, 75, 75, method = 'bilinear')            
+im = resizeImage(im, 75, 75, method = 'bilinear') 
+
+use_2D = TRUE
+
+if(use_2D){
+  im = grayscale(im)
+  dim = 2
+} else {
+  dim = 3
+}
+
+plot(grayscale(im))
+
 
 # plot resized image
 # dev.off() # clear plots
-imageShow(im_res)
+imageShow(im)
 
 # vectorize RGB
-im_vec = apply(im_res, 3, as.vector)
+im_vec = apply(im, 3, as.vector)
 
 # perform KMeans_rcpp clustering
 km_rc = KMeans_rcpp(
@@ -30,16 +44,19 @@ km_rc$between.SS_DIV_total.SS
 
 # between.SS_DIV_total.SS = (total_SSE - sum(WCSS_per_cluster)) / total_SSE
 
-pr = predict(km_rc, newdata = im2)
+pr = predict(km_rc, newdata = im_vec)
 
-get_cent = km_rc$centroids
-get_clust = km_rc$clusters
+centroids = km_rc$centroids
+clusters = km_rc$clusters
+table(clusters)
 
 # each observation is associated with the nearby centroid
-new_im = get_cent[get_clust, ]
+new_im = centroids[clusters, ]
 
 # back-convertion to a 3-dimensional image
-dim(new_im) = c(nrow(im), ncol(im), 3)
+dim(new_im) = c(nrow(im_res), ncol(im_res), 3)
 
 imageShow(new_im)
+
+
 

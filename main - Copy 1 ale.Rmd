@@ -77,7 +77,7 @@ points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="brown")
 
 ```{r}
 
-x = subset(df, select=-c(color))
+x = subset(df1, select=-c(color))
 gmm_3 = GMM(x, 3, dist_mode = "maha_dist", seed_mode = "random_subset")          
 
 # predict centroids, covariance matrix and weights

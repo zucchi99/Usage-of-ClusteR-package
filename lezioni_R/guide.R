@@ -42,13 +42,20 @@ summary(possum$sex)
 # NB: to be used with seq(start, end, step)
 # normal   distribution: dnorm,  pnorm,  qnorm,  rnorm
 # binomial distribution: dbinom, pbinom, qbinom, rbinom
-# d ==> density/distribution
-# p ==> 
-# q ==> quantile
-  # NB lower.tail = TRUE:  si considera coda sx
-  # NB lower.tail = FALSE: si considera coda dx
-  # stesso risultato si ottiene con qnorm(1-p, left, right, lower.tail = FALSE)
-# r ==> simulate a sample con dimension n
+# d(x, mu, sd, log=F) 
+  # ==> density distribution ==> P(X=x)
+# p(q, mu, sd, lower.tail = T, log.p = FALSE) 
+  # ==> integral ==> P(X < left)
+  # NB lower.tail = T: coda sx ==> -inf to q (by default)
+  # NB lower.tail = F: coda dx ==> q to +inf
+  # NB2: pnorm(x, mu, sigma) = 1 - pnorm(x, mu, sigma, lower.tail = FALSE)
+# q(percentile, mu, sd, lower.tail = T, log.p = FALSE) 
+  # ==> q(percentile) = min { left t.c. pnorm(left) > percentile } (è l'inversa di pnorm)
+  # NB lower.tail = T: coda sx (by default)
+  # NB lower.tail = F: coda dx
+  # stesso risultato si ottiene con qnorm(1-p, lower.tail = FALSE)
+# r(n, mu, sd) 
+  # ==> simulate a sample con dimension n
 
 # density of a column (to be used inside a line):
 # density
@@ -130,6 +137,7 @@ boxplot(
 plot(
   totlngth ~ hdlngth, 
   data = possum,
-  pch = 16
+  cex = 0.8, # default char size is multiplied by char_size
+  pch = 16 # point shape
 )    
 
