@@ -353,16 +353,16 @@ The k-medoid variations are supported by the implementations Cluster_Medoids and
 ```{r}
 
 x = subset(df1, select=c(X1, X2))
-cluster_med = KMeans_rcpp(x, 3)          
+cluster_med = Cluster_Medoids(x, 3)          
 
 # predict centroids, covariance matrix and weights
-df1["color_pred_cluster_3"] = predict(kmeans_rcpp, newdata = x)
+df1["color_pred_cluster_3"] = predict(cluster_med, newdata = x)
 
 plot(x=df1$X1, y=df1$X2, col=df1$color_pred_cluster_3 + 1)
 points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="black")
 points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="black")
 points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="black")
-points(cluster_med$centroids, pch="X", cex=2, col="azure")
+points(cluster_med$medoids, pch="X", cex=2, col="azure")
 
 ```
 
