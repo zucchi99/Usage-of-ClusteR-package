@@ -3,6 +3,9 @@ library(MASS)
 library(dplyr)
 library(ClusterR)
 
+dim = 2
+num_clusters = 3
+
 generate_data <- function(dim, clust, n_mul, n_base, mu_mul, mu, sigma) {
   df = data.frame()
   j = 1
@@ -19,10 +22,10 @@ generate_data <- function(dim, clust, n_mul, n_base, mu_mul, mu, sigma) {
   return(df)
 }
 
-generate_default_data <- function() {
-  dim = 2
-  clust = 3
-  n_mul = 100
+generate_default_data <- function(dim = 2, num_clusters=3) {
+  dim = dim
+  clust = num_clusters
+  n_mul = 5
   
   sigma = rbind(
     matrix(c(1, -.6, 0, 1), ncol = dim),
@@ -36,47 +39,49 @@ generate_default_data <- function() {
     clust = clust,
     n_mul = n_mul,
     n_base = c(10,10,15),
-    mu_mul = log(base=10, n_mul)/2,
+    mu_mul = 1.3, #log(base=10, n_mul)/2,
     mu = matrix(c(5,5,0,0,3,1), ncol=dim, byrow = TRUE),
     sigma = sigma
   )
   return(df)
 }
 
-df = generate_default_data()
+df = generate_default_data(dim, num_clusters)
 
 # create bivariate normal distribution
 colors = c('blue', 'darkgreen', 'orange')
-labels = c(1,2,3)
+labels = seq(1, num_clusters, 1)
 
-use_shapes = FALSE
+# define shapes to be used in chart:
+# use_shapes=F ==> always circles
+# use_shapes=T ==> each cluster its shape
+use_shapes = TRUE
 if (use_shapes) {
   shapes = df$color  
   shap_labels = labels
 } else {
   shapes = 1
-  shap_labels = c(1,1,1)
+  shap_labels = seq(1, num_clusters, 1)
 }
 
 plot(x=df$X1, y=df$X2, col=colors[df$color], pch=shapes)
-
-legend("topleft", c("1","2","3"), cex=.8, col=colors, pch=shap_labels)
+legend("topleft", as.character(seq(1, num_clusters, 1)), cex=.8, col=colors, pch=shap_labels)
 
 # perform KMeans_rcpp clustering
 km_rc = KMeans_rcpp(
-    data = df$color, 
-    clusters = 5, 
+    data = df, 
+    clusters = num_clusters, 
     num_init = 5, 
     max_iters = 100, 
     initializer = 'optimal_init', 
     verbose = F
 )
 
+# between.SS_DIV_total.SS = (total_SSE - sum(WCSS_per_cluster)) / total_SSE
 km_rc$between.SS_DIV_total.SS
 
-# between.SS_DIV_total.SS = (total_SSE - sum(WCSS_per_cluster)) / total_SSE
-
-pr = predict(km_rc, newdata = im_vec)
+# predict centroids, covariance matrix and weights
+df['KMeans_rcpp'] = predict(km_rc, newdata = df)
 
 centroids = km_rc$centroids
 clusters = km_rc$clusters
@@ -85,10 +90,6 @@ table(clusters)
 # each observation is associated with the nearby centroid
 new_data = centroids[clusters, ]
 
-# back-convertion to a 3-dimensional image
-dim(new_data) = c(nrow(im_res), ncol(im_res), 3)
-
-imageShow(new_im)
-
-
-
+# plot predictions
+plot(x=df$X1, y=df$X2, col=colors[df$KMeans_rcpp], pch=shapes)
+legend("topleft", as.character(seq(1, num_clusters, 1)), cex=.8, col=colors, pch=shap_labels)
