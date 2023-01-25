@@ -6,18 +6,11 @@ library(ClusterR)
 generate_data <- function(dim, clust, n_mul, n_base, mu_mul, mu, sigma) {
   df = data.frame()
   j = 1
-  
   for (i in 1:clust) {
-    
-    print(n_base[i] * n_mul)
-    print(mu[1,] * mu_mul)
-    print(sigma[j:(j+1),])
-    print('')
-    
     df = rbind(
       df,
       data.frame(
-        mvrnorm(n = n_base[i] * n_mul, mu = mu[1,] * mu_mul, Sigma = sigma[j:(j+1),]), 
+        mvrnorm(n = n_base[i] * n_mul, mu = mu[i,] * mu_mul, Sigma = sigma[j:(j+1),]), 
         color=i
       )
     )
