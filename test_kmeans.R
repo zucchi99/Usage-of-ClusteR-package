@@ -13,11 +13,11 @@ generate_data <- function(dim, clust, n_mul, n_base, mu_mul, mu, sigma) {
     df = rbind(
       df,
       data.frame(
-        mvrnorm(n = n_base[i] * n_mul, mu = mu[i,] * mu_mul, Sigma = sigma[j:(j+1),]), 
+        mvrnorm(n = n_base[i] * n_mul, mu = mu[i,] * mu_mul, Sigma = sigma[j:(j+(dim-1)),]), 
         color=i
       )
     )
-    j = j + 2
+    j = j + dim
   }
   return(df)
 }
@@ -32,7 +32,7 @@ generate_default_data <- function(dim = 2, num_clusters=3) {
     matrix(c(.8, 0,  0, 4), ncol = dim),
     matrix(c(3, .7,  0, 2), ncol = dim)
   )
-  colnames(sigma) = c("x", "y")
+  #colnames(sigma) = c("x", "y")
   
   df = generate_data(
     dim = dim,

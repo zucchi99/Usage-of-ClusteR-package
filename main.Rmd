@@ -1,10 +1,23 @@
 ---
-title: "R Notebook"
+title: "Introduction of package ClusterR"
 output: html_notebook
 ---
 
-Introduction of package ClusterR.
-Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/vignettes/the_clusterR_package.html.
+
+#Introduction
+
+
+ClusterR, as the name says, is an R package with some tools for clustering data.
+
+Clustering data is a technique used in the unsupervised learning framework, where for each observation $1 \leq i \leq n$, is given only the vector $x_i$ of the measurements, without any associated response variable $y_i$.
+
+So, since we do not have $y$ we cannot apply any type of checks on the error between real and predicted values for the response variable.   
+
+Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/.
+
+
+#Summary
+
 
 
 ---> dataset sintetici 2d per visualizzazioni 
