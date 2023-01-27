@@ -3,98 +3,148 @@ title: "Introduction of package ClusterR"
 output: html_notebook
 ---
 
+<!--
+#author: "143095 Francesco Zuccato, xxxxx Alessio Corrado"
+  #enable table of contents
+  #enable numbering sections
+  #toc: true 
+  #number_sections: true 
+-->
 
-#Introduction
+<!-- 
+#latex compiler
+output: pdf_document
+  #enable table of contents
+  #enable numbering sections
+  toc: true 
+  number_sections: true 
+-->
 
+<!-- 
+#yaml compiler
+output: html_notebook
+  #enable table of contents
+  #enable numbering sections
+  toc: true 
+  number_sections: true 
+-->
 
-ClusterR, as the name says, is an R package with some tools for clustering data.
+## Introduction
 
-Clustering data is a technique used in the unsupervised learning framework, where for each observation $1 \leq i \leq n$, is given only the vector $x_i$ of the measurements, without any associated response variable $y_i$.
+ClusterR, as the name says, is an R package with some tools for
+clustering data.
 
-So, since we do not have $y$ we cannot apply any type of checks on the error between real and predicted values for the response variable.   
 
 Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/.
 
+<!-- dataset sintetici 2d per visualizzazioni punti generati da
+gaussiane punti generati da PCA di un dataset grande -\> proteine? -->
 
-#Summary
+## Summary
 
+- Introduzione al clustering <!-- (cos'è, immagini d'esempio, esempi di applicazione) -->
+- Descrizione dei tipi di clustering
+  * Connectivity based
+  * Centroid based
+  * Distribution based
+  * Density based
+- Dataset di esempio della libreria
+- Silouhette plot <!-- visualizzare la bonta del clustering -->
+- Clustering supportati da ClusterR <!-- (centroid based, distribution based) -->
+  * Centroid based <!-- k-means, mini-batch-kmeans, k-medoids -->
+    - KMeans_rcpp
+    - KMeans_arma
+    - mini-batch KMeans
+    - Optimal_Clusters_KMeans 
+  * Mediod based
+    - Cluster_Medoids
+    - Clara_Medoids
+  * Distribution based clustering
+    - Gaussian Mixture Models 
+      * Optimal_Clusters_GMM 
+- Distribution vs Centroid
+- differenze clustering usando i dataset sintetici
+- external_validation per validazione con true label 
+- (optional) paragone ClusteR vs ClusterR
 
+## Unsupervised Learning
 
----> dataset sintetici 2d per visualizzazioni 
-  punti generati da gaussiane
-  punti generati da PCA di un dataset grande -> proteine? 
-  
-  
-  
+Clustering data is a technique used in the unsupervised learning
+framework, where for each observation $1 \leq i \leq n$, is given only
+the vector $x_i$ of the measurements, without any associated response
+variable $y_i$.
 
--  Introduzione al clustering (cos'è, immagini d'esempio, esempi di applicazione)
--  Descrizione dei tipi di clustering 
--       Connectivity based
--       Centroid based
--       Distribution based
--       Density based
--  Dataset di esempio della libreria
--  Clustering supportati da ClusterR (centroid based, distribution based)
--  Centroid based clustering (k-means, mini-batch-kmeans, k-medoids)
--       k-means basic usage - KMeans_rcpp
--       variare il numero di k - immagini per diversi k
--       optimal k - Optimal_Clusters_KMeans 
--       visualizzare la bonta del clustering - Silouhette plot
--       misura del tempo di esecuzione - large dataset - KMeans_rcpp vs KMeans_arma vs mini-batck KMeans
--       medoids vs centroids - Cluster_Medoids
--       misura del tempo di esecuzione - Cluster_Medoids vs Clara_Medoids
--  Distribution based clustering
--       Gaussian Mixture Models Optimal_Clusters_GMM 
--       visualizzazione 2d gaussiane
--  Distribution vs Centroid
--       differenze clustering usando i dataset sintetici
--       external_validation per validazione con true label 
--  (optional) paragone ClusteR vs ClusterR
+So, since we do not have $y$ we cannot apply any type of checks on the
+error between real and predicted values for the response variable.
 
+## Clustering
 
+Clustering is the task of dividing the population or data points into a
+number of groups such that data points in the same groups are more
+similar to other data points in the same group and dissimilar to the
+data points in other groups. It is basically a collection of objects on
+the basis of similarity and dissimilarity between them.
 
+Clustering is one of the unsupervised learning methods: it means that we
+have no references or labeled responses. For this reason the clustering
+algorithms can only rely on the given data, regardless of the specific
+task we are trying to solve. Clustering is suitable for explaining the
+possible data-generating process, for finding possible relations or
+hierarchies between data or as a part of the exploratory data analysis.
 
+For doing clustering is necessary to define a measure of similarity:
+similar items should belong to the same group. A measure of similarity
+must be non-negative, symmetric and must have a value of zero only if
+the items are equal. There are various possible similarity measures, for
+example: euclidean distance, manhattan distance and maximum distance. A
+clustering library should give the possibility to specify the similarity
+function to be used.
 
+A predictive algorithm based on clustering may for example use the value
+of nearest cluster to give the response for a new data point. It is also
+possible to combine the informations of all clusters, weighted by the
+cluster distances.
 
+There are four different types of clustering: - Connectivity based -
+Centroid based - Distribution based - Density based
 
+Connectivity-based clustering tries to create connections between the
+clusters. In this way the algorithm creates a tree (or a forest), which
+can give us an hierarchial view of the data. Two possible uses can be
+creating a cause-effect relationship between items or reconstructing a
+possible evolution of a population.
 
-Clustering is the task of dividing the population or data points into a number of groups such that data points in the same groups are more similar to other data points in the same group and dissimilar to the data points in other groups. It is basically a collection of objects on the basis of similarity and dissimilarity between them. 
+Centroid-based clustering is based on centroids: each item belongs to
+the class of its nearest centroid. The centroids can be restricted to
+locations of the items (medoid) or generic points (centroid). The number
+of centroids can be hard-coded or searched by the algorithm; the
+position of the centroids is optimized by the algorithm. In general it
+is better to have the minimum number of centroids that explains well the
+data (simplest model).
 
-Clustering is one of the unsupervised learning methods: it means that we have no references or labeled responses. For this reason the clustering algorithms can only rely on the given data, regardless of the specific task we are trying to solve. Clustering is suitable for explaining the possible data-generating process, for finding possible relations or hierarchies between data or as a part of the exploratory data analysis.
+Distribution-based clustering uses a probabilistic model to explain the
+original data-generating model, by minimizing the discrepancy. By doing
+so, it is possible to create specific models that accurately describe
+the data and give an idea of the prediction confidence. A general way to
+describe data is by using Gaussian Mixture Models.
 
-For doing clustering is necessary to define a measure of similarity: similar items should belong to the same group. A measure of similarity must be non-negative, symmetric and must have a value of zero only if the items are equal. There are various possible similarity measures, for example: euclidean distance, manhattan distance and maximum distance. A clustering library should give the possibility to specify the similarity function to be used. 
+Density-based clustering groups data using distance between points.
+Dense connected regions of points should be part of the same cluster. In
+this way there is not a fixed number of clusters, but the number of
+clusters depends on how many different regions of data points are there
+and on the chosen density threshold. Two examples of density-based
+clustering algorithms are DBSCAN and OPTICS.
 
-A predictive algorithm based on clustering may for example use the value of nearest cluster to give the response for a new data point. It is also possible to combine the informations of all clusters, weighted by the cluster distances. 
+ClusterR is a package designed for cluster generation and analysis. It
+combines different clustering algorithms, along with helper functions
+and example datasets.
 
-There are four different types of clustering:
--       Connectivity based
--       Centroid based
--       Distribution based
--       Density based
-
-Connectivity-based clustering tries to create connections between the clusters. In this way the algorithm creates a tree (or a forest), which can give us an hierarchial view of the data. Two possible uses can be creating a cause-effect relationship between items or reconstructing a possible evolution of a population. 
-
-Centroid-based clustering is based on centroids: each item belongs to the class of its nearest centroid. The centroids can be restricted to locations of the items (medoid) or generic points (centroid). The number of centroids can be hard-coded or searched by the algorithm; the position of the centroids is optimized by the algorithm. In general it is better to have the minimum number of centroids that explains well the data (simplest model). 
-
-Distribution-based clustering uses a probabilistic model to explain the original data-generating model, by minimizing the discrepancy. By doing so, it is possible to create specific models that accurately describe the data and give an idea of the prediction confidence. A general way to describe data is by using Gaussian Mixture Models. 
-
-Density-based clustering groups data using distance between points. Dense connected regions of points should be part of the same cluster. In this way there is not a fixed number of clusters, but the number of clusters depends on how many different regions of data points are there and on the chosen density threshold. Two examples of density-based clustering algorithms are DBSCAN and OPTICS. 
-
-
-
-
-
-
-ClusterR is a package designed for cluster generation and analysis. It combines different clustering algorithms, along with helper functions and example datasets.
-
-The package is subdivided in different parts:
-- clustering algorithms
-- searching for optimal number of clusters of the clustering algorithms
-- prediction using the generated clusters
-- visualization of the clustering goodness using 2d scatterplots and silouhette dissimilarity plots
-- validation of the clustering goodness using ground truth labels 
-- helper methods
-
+The package is subdivided in different parts: - clustering algorithms -
+searching for optimal number of clusters of the clustering algorithms -
+prediction using the generated clusters - visualization of the
+clustering goodness using 2d scatterplots and silouhette dissimilarity
+plots - validation of the clustering goodness using ground truth
+labels - helper methods
 
 ```{r}
 ClusterR::center_scale
@@ -126,29 +176,42 @@ ClusterR::predict_Medoids
 ClusterR::Silhouette_Dissimilarity_Plot
 ```
 
+ClusterR only supports Distribution-based and Centroid-based algorithms.
 
+The only distribution-based algorithm in ClusterR is GMM (Gaussian
+Mixture Model). GMM models the data-generating process as a set of
+gaussian models, one for each cluster. Doing so, each gaussian (cluster)
+gives the probability density function of the points it generates. A
+point belongs to the cluster that maximized the probability of
+generating it there.
 
+GMM uses generalized gaussian distributions, so each cluster has its own
+independent mean (centroid) and variance (diagonal covariance matrix).
 
-ClusterR only supports Distribution-based and Centroid-based algorithms. 
+For the Centroid-based algorithms, ClusterR supports K-means and
+K-medoids variations.
 
-The only distribution-based algorithm in ClusterR is GMM (Gaussian Mixture Model). GMM models the data-generating process as a set of gaussian models, one for each cluster. Doing so, each gaussian (cluster) gives the probability density function of the points it generates. A point belongs to the cluster that maximized the probability of generating it there. 
+K-means initially creates k random points which represents the
+centroids. Then, for each iteration, the algorithm moves the centroid
+positions to optimize the clustering. The k-medoid algorithms is a
+variation of k-means, which changes the way to calculate the center of each cluster:
+ - k-means uses the mean of all its points (which is not necessarily a point of the cluster)
+   * \rightarrow pros: center of the cluster coincides with the mean point over all its coordinates
+ - k-mediods uses the median point of the cluster (so a point of the cluster)
+   * \rightarrow pros: center of the cluster coincides is not influenced by noise or outliers.
+ 
+For testing the GMM algorithm, we have created a synthetic dataset drawn
+from three 2-dimensional gaussians.
 
-GMM uses generalized gaussian distributions, so each cluster has its own independent mean (centroid) and variance (diagonal covariance matrix).
+To do it we used the library MASS, which defines the function mvrnorm:
+specifying the mu (mean) and sigma (correlation matrix), along with the
+desidered dimensionality and number of samples, it returns a matrix
+representing n R\^k points. Then we combined three of these matrix (one
+for each gaussian generating process) into a single dataframe, where the
+column "color" specifies the class for each point.
 
-
-
-For the Centroid-based algorithms, ClusterR supports K-means and K-medoids variations. 
-
-K-means initially creates k random points which represents the centroids. Then, for each iteration, the algorithm moves the centroid positions to optimize the clustering. The k-medoid algorithms are a variation of k-means, which add the constraint that the centroids must be placed over the item positions. 
-
-
-
-For testing the GMM algorithm, we have created a synthetic dataset drawn from three 2-dimensional gaussians.
-
-To do it we used the library MASS, which defines the function mvrnorm: specifying the mu (mean) and sigma (correlation matrix), along with the desidered dimensionality and number of samples, it returns a matrix representing n R^k points. Then we combined three of these matrix (one for each gaussian generating process) into a single dataframe, where the column "color" specifies the class for each point. 
-
-We finally visualized the points using a 2-d colored scatterplot; the digits indicate the positions of the centroids. 
-
+We finally visualized the points using a 2-d colored scatterplot; the
+digits indicate the positions of the centroids.
 
 ```{r}
 
@@ -178,22 +241,20 @@ points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="brown")
 
 ```
 
+The function given by the library to compute Gaussian Mixture Models
+(GMM) is GMM. It takes two compulsory arguments: the matrix specifying
+the item positions (one row for each item, one column for each
+component) and the number of gaussian processes.
 
-
-The function given by the library to compute Gaussian Mixture Models (GMM) is GMM. 
-It takes two compulsory arguments: the matrix specifying the item positions (one row for each item, one column for each component) and the number of gaussian processes. 
-
-The other parameters are:
-- dist_mode: specifies if the training algorithm should use euclidean or manhattan distance
-- seed mode: specifies the initial placement of the centroids for the iterative algorithm (static/random subset/spread)
-- number of iterations for the k-means algorithm
-- number of iterations for the expectation-maximization algorithm
-- smallest possible values for diagonal covariances
-- seed for random number generator (to make the experiment replicable)
-- whether or not to plot the results in a graphical form
-- verbosity
-
-
+The other parameters are: - dist_mode: specifies if the training
+algorithm should use euclidean or manhattan distance - seed mode:
+specifies the initial placement of the centroids for the iterative
+algorithm (static/random subset/spread) - number of iterations for the
+k-means algorithm - number of iterations for the
+expectation-maximization algorithm - smallest possible values for
+diagonal covariances - seed for random number generator (to make the
+experiment replicable) - whether or not to plot the results in a
+graphical form - verbosity
 
 ```{r}
 x = subset(df1, select=c(X1, X2))
@@ -210,37 +271,38 @@ points(gmm_3$centroids, pch="X", cex=2, col="azure")
 
 ```
 
+It is also possible to use the *plot_2d* function, defined by by the
+ClusterR package, for a 2-d visualization of the predicted points along
+with the centroid/medoid positions.
 
-It is also possible to use the *plot_2d* function, defined by by the ClusterR package, for a 2-d visualization of the predicted points along with the centroid/medoid positions. 
-
-The arguments are:
-- data, 2-dimensional matrix specifying the item positions
-- clusters, a list specifying the class for each item (numeric vector)
-- centroids_medoids, the position of the centroids (or medoids)
-
+The arguments are: - data, 2-dimensional matrix specifying the item
+positions - clusters, a list specifying the class for each item (numeric
+vector) - centroids_medoids, the position of the centroids (or medoids)
 
 ```{r}
 plot_2d(data = x, clusters = df1$color_pred_3, centroids_medoids = gmm_3$centroids)
 ```
 
-The function *external_validation*, also defined in the ClusterR package, gives us the possibility to extract some useful metrics measuring the goodness of the fit. It requires only the predicted values and annotated values. 
+The function *external_validation*, also defined in the ClusterR
+package, gives us the possibility to extract some useful metrics
+measuring the goodness of the fit. It requires only the predicted values
+and annotated values.
 
-The arguments are:
-- true_labels: the annotated values
-- clusters: the predicted values
-- method for calculating the goodness (the value returned by the function. although the function shows all the measures in the log)
-- summary_stats: whether or not to print summary statistics like sensitivity and specificity
-
+The arguments are: - true_labels: the annotated values - clusters: the
+predicted values - method for calculating the goodness (the value
+returned by the function. although the function shows all the measures
+in the log) - summary_stats: whether or not to print summary statistics
+like sensitivity and specificity
 
 ```{r}
 external_validation(df1$color, df1$color_pred_3, summary_stats = T)
 ```
 
-The GMM object has 4 attributes: 
-- centroids: a matrix that specifies the position of one centroid per row
-- covariance_matrices: a matrix that specifies one diagonal covariance matrix per row
-- weights, for each gaussian component (list)
-- Log_likelihood: a matrix one row for each training item and one column for each component
+The GMM object has 4 attributes: - centroids: a matrix that specifies
+the position of one centroid per row - covariance_matrices: a matrix
+that specifies one diagonal covariance matrix per row - weights, for
+each gaussian component (list) - Log_likelihood: a matrix one row for
+each training item and one column for each component
 
 ```{r}
 gmm_3$centroids
@@ -249,10 +311,13 @@ gmm_3$weights
 head(gmm_3$Log_likelihood)
 ```
 
-Since it is possible to specify the number of clusters, we tried running the GMM algorithm specifying gaussian_comps=2. 
+Since it is possible to specify the number of clusters, we tried running
+the GMM algorithm specifying gaussian_comps=2.
 
-We can see that the clustering still makes sense, even if the external validation statistics are worse. One of the centroids remains on the cluster nr.1, while the other centroid is in the middle of clusters 2 and 3. 
-
+We can see that the clustering still makes sense, even if the external
+validation statistics are worse. One of the centroids remains on the
+cluster nr.1, while the other centroid is in the middle of clusters 2
+and 3.
 
 ```{r}
 
@@ -272,27 +337,31 @@ external_validation(df1$color, df1$color_pred_2, summary_stats = T)
 
 ```
 
+How to find the optimal number of centroids? Doing so by plotting the
+data with colors only works for small datasets representable in two
+dimensions. The function Optimal_Clusters_GMM calculates the goodness of
+the fit for each \# of clusters between 1 and max_clusters.
 
+The criterion can be AIC (Alkaine Information Criterion) or BIC (Bayes
+Information Criterion). A rule of thumb is that we should select the
+smallest (simplest) model with good performances, so the best model
+should be the one which minimized one of these criterions.
 
-How to find the optimal number of centroids? 
-Doing so by plotting the data with colors only works for small datasets representable in two dimensions. 
-The function Optimal_Clusters_GMM calculates the goodness of the fit for each # of clusters between 1 and max_clusters. 
+The other parameters are: - dist_mode: specifies if the training
+algorithm should use euclidean or manhattan distance - seed mode:
+specifies the initial placement of the centroids for the iterative
+algorithm (static/random subset/spread) - number of iterations for the
+k-means algorithm - number of iterations for the
+expectation-maximization algorithm - smallest possible values for
+diagonal covariances - seed for random number generator (to make the
+experiment replicable) - whether or not to plot the results in a
+graphical form - verbosity
 
-The criterion can be AIC (Alkaine Information Criterion) or BIC (Bayes Information Criterion). A rule of thumb is that we should select the smallest (simplest) model with good performances, so the best model should be the one which minimized one of these criterions. 
-
-The other parameters are:
-- dist_mode: specifies if the training algorithm should use euclidean or manhattan distance
-- seed mode: specifies the initial placement of the centroids for the iterative algorithm (static/random subset/spread)
-- number of iterations for the k-means algorithm
-- number of iterations for the expectation-maximization algorithm
-- smallest possible values for diagonal covariances
-- seed for random number generator (to make the experiment replicable)
-- whether or not to plot the results in a graphical form
-- verbosity
-
-In the output we can see that a model with 3 clusters should be fine, because after this value the BIC stops increasing sharply. Models with a lot of clusters have a even lower value for BIC but may be too complex. This shows why it is important to watch also the clustering results using a scatterplot, if possible. 
-
-
+In the output we can see that a model with 3 clusters should be fine,
+because after this value the BIC stops increasing sharply. Models with a
+lot of clusters have a even lower value for BIC but may be too complex.
+This shows why it is important to watch also the clustering results
+using a scatterplot, if possible.
 
 ```{r}
 
@@ -303,33 +372,30 @@ opt_gmm = Optimal_Clusters_GMM(x, max_clusters = 10, criterion = "BIC",
 
 ```
 
+ClusterR supports k-means algorithm with two different implementations:
+KMeans_arma and KMeans_rcpp. The difference is that KMeans_rcpp: -
+allows for the specification of the initial centroid positions and other
+initialization methods - the running time and convergence can be set by
+the user - the num_init parameter KMeans_arma is faster than
+KMeans_rcpp.
 
+Their interface is similar to GMM, but specific for k-means task. The
+arguments for KMeans_rcpp are: - data: a matrix specifying the item
+positions (items on rows, components on columns) - clusters: the number
+of clusters - num_init: how many times to run the algorithm with
+different initializations. If \>1, the function returns the best
+clustering by within-cluster-sum-of-squared-error - max_iters: max
+number of iterations - initializer: how to initialize the centroids
+(optimal_init, quantile_init, kmeans++, random) - fuzzy: if true, the
+prediction probabilities are proportional to the distances to the
+centroids - CENTROIDS: a matrix specifying the initial positions (one
+row per centroid, one column per component) - tol: tolerance for
+convergence - tol_optimal_init: tolerance value when using the
+"optimal_init" initializer (higher means further inital positions) -
+seed of the RNG (for reproducibility) - verbosity
 
-
-ClusterR supports k-means algorithm with two different implementations: KMeans_arma and KMeans_rcpp.
-The difference is that KMeans_rcpp:
-- allows for the specification of the initial centroid positions and other initialization methods
-- the running time and convergence can be set by the user
-- the num_init parameter
-KMeans_arma is faster than KMeans_rcpp. 
-
-
-Their interface is similar to GMM, but specific for k-means task. The arguments for KMeans_rcpp are:
-- data: a matrix specifying the item positions (items on rows, components on columns)
-- clusters: the number of clusters
-- num_init: how many times to run the algorithm with different initializations. If >1, the function returns the best clustering by within-cluster-sum-of-squared-error
-- max_iters: max number of iterations
-- initializer: how to initialize the centroids (optimal_init, quantile_init, kmeans++, random)
-- fuzzy: if true, the prediction probabilities are proportional to the distances to the centroids
-- CENTROIDS: a matrix specifying the initial positions (one row per centroid, one column per component)
-- tol: tolerance for convergence
-- tol_optimal_init: tolerance value when using the "optimal_init" initializer (higher means further inital positions)
-- seed of the RNG (for reproducibility)
-- verbosity
-
-
-In the following the result of k-means clustering with k=3 and KMeans_rcpp implementation. 
-
+In the following the result of k-means clustering with k=3 and
+KMeans_rcpp implementation.
 
 ```{r}
 
@@ -349,19 +415,13 @@ points(kmeans_rcpp$centroids, pch="X", cex=2, col="azure")
 
 ```
 
-
-
 ... todo comparison of running time between rcpp and arma...
 
+The k-medoid variations are supported by the implementations
+Cluster_Medoids and Clara_Medoids.
 
-
-
-The k-medoid variations are supported by the implementations Cluster_Medoids and Clara_Medoids. 
-
-... todo cluster/clara documentation...
-... todo cluster vs kmeans for very small datasets (cluster should place centroids on items)... 
-
-
+... todo cluster/clara documentation... ... todo cluster vs kmeans for
+very small datasets (cluster should place centroids on items)...
 
 ```{r}
 
@@ -379,14 +439,9 @@ points(cluster_med$medoids, pch="X", cex=2, col="azure")
 
 ```
 
-
-
 ... todo batch kmeans (doc, running time for large datasets)...
 
-
-
-...todo silouhette plot for kmeans... 
-
+...todo silouhette plot for kmeans...
 
 ```{r}
 
@@ -401,30 +456,25 @@ cm = Cluster_Medoids(dat, clusters = 5, distance_metric = 'jaccard_coefficient')
 plt_sd = Silhouette_Dissimilarity_Plot(cm, silhouette = TRUE)
 ```
 
+In the package ClusterR there are 3 different datasets: -
+dietary_survey_IBS: Synthetic data using a dietary survey of patients
+with irritable bowel syndrome. - mushroom: The mushroom data - soybean:
+The soybean (large) data set from the UCI repository
 
-
-
-
-
-
-In the package ClusterR there are 3 different datasets: 
--   dietary_survey_IBS: Synthetic data using a dietary survey of patients with irritable bowel syndrome. 
--   mushroom: The mushroom data
--   soybean: The soybean (large) data set from the UCI repository
-
-
-*dietary_survey_IBS* contains synthetic data generated using the mean and standard deviation of data used in the paper "A dietary survey of patients with irritable bowel syndrome".
+*dietary_survey_IBS* contains synthetic data generated using the mean
+and standard deviation of data used in the paper "A dietary survey of
+patients with irritable bowel syndrome".
 
 ```{r}
 help(dietary_survey_IBS)
 ```
 
-It contains 400 rows and 43 columns. 
+It contains 400 rows and 43 columns.
 
-"class" is the target column. Its values are O and 1, with 0 meaning healty and 1 meaning IBS-positive. 
+"class" is the target column. Its values are O and 1, with 0 meaning
+healty and 1 meaning IBS-positive.
 
-The other 42 columns are numeric and can be used as predictors. 
-
+The other 42 columns are numeric and can be used as predictors.
 
 ```{r}
 dim(dietary_survey_IBS)
@@ -436,7 +486,8 @@ unique(dietary_survey_IBS$class)
 head(dietary_survey_IBS)
 ```
 
-In the following a 2d PCA for the entire dataset: black for class 0 (healty) and red for class 1 (positive). 
+In the following a 2d PCA for the entire dataset: black for class 0
+(healty) and red for class 1 (positive).
 
 ```{r}
 
@@ -445,22 +496,26 @@ plot(pca_dat, col=dietary_survey_IBS$class + 1)
 
 ```
 
+*mushroom* includes descriptions of hypothetical samples corresponding
+to 23 species of gilled mushrooms in the Agaricus and Lepiota Family
+(pp. 500-525).
 
-*mushroom* includes descriptions of hypothetical samples corresponding to 23 species of gilled mushrooms in the Agaricus and Lepiota Family (pp. 500-525). 
-
-Each species can either be edible or poisonous. The Guide clearly states that there is no simple rule for determining the edibility of a mushroom; no rule like 'leaflets three, let it be' for Poisonous Oak and Ivy. For simplicity the unknown targets are marked as poisounous. 
-
+Each species can either be edible or poisonous. The Guide clearly states
+that there is no simple rule for determining the edibility of a
+mushroom; no rule like 'leaflets three, let it be' for Poisonous Oak and
+Ivy. For simplicity the unknown targets are marked as poisounous.
 
 ```{r}
 help(mushroom)
 ```
 
-It contains 8124 rows and 23 columns. 
+It contains 8124 rows and 23 columns.
 
-"class" is the target column. Its values are "p" and "e", with "p" meaning poisounous (or unknown) and e meaning "edible". 
+"class" is the target column. Its values are "p" and "e", with "p"
+meaning poisounous (or unknown) and e meaning "edible".
 
-The other 22 columns contain one character each and can be used as predictors. 
-
+The other 22 columns contain one character each and can be used as
+predictors.
 
 ```{r}
 dim(mushroom)
@@ -472,7 +527,8 @@ unique(mushroom$class)
 head(mushroom)
 ```
 
-In the following a 2d PCA for the entire dataset: black for class 0 (edible) and red for class 1 (poisounous). 
+In the following a 2d PCA for the entire dataset: black for class 0
+(edible) and red for class 1 (poisounous).
 
 ```{r}
 X = mushroom[1:1000, -1]
@@ -488,22 +544,28 @@ plot(pca_dat, col=y)
 
 ```
 
+*soybean* contains a dataset about soybeans characteristics from UCI
+machine learning repository.
 
-*soybean* contains a dataset about soybeans characteristics from UCI machine learning repository. 
-
-There are both categorical and ordinal values, encoded by integers. Missing values were imputated using the mice package.
-
+There are both categorical and ordinal values, encoded by integers.
+Missing values were imputated using the mice package.
 
 ```{r}
 help(soybean)
 ```
 
-It contains 307 rows and 36 columns. 
+It contains 307 rows and 36 columns.
 
-"class" is the target column. Its values are "diaporthe-stem-canker", "charcoal-rot", "rhizoctonia-root-rot", "phytophthora-rot", "brown-stem-rot", "powdery-mildew", "downy-mildew", "brown-spot", "bacterial-blight", "bacterial-pustule", "purple-seed-stain", "anthracnose", "phyllosticta-leaf-spot", "alternarialeaf-spot", "frog-eye-leaf-spot", "diaporthe-pod-&-stem-blight", "cyst-nematode", "2-4-d-injury" and "herbicide-injury". 
+"class" is the target column. Its values are "diaporthe-stem-canker",
+"charcoal-rot", "rhizoctonia-root-rot", "phytophthora-rot",
+"brown-stem-rot", "powdery-mildew", "downy-mildew", "brown-spot",
+"bacterial-blight", "bacterial-pustule", "purple-seed-stain",
+"anthracnose", "phyllosticta-leaf-spot", "alternarialeaf-spot",
+"frog-eye-leaf-spot", "diaporthe-pod-&-stem-blight", "cyst-nematode",
+"2-4-d-injury" and "herbicide-injury".
 
-The other 25 columns contain one integer each and can be used as predictors. 
-
+The other 25 columns contain one integer each and can be used as
+predictors.
 
 ```{r}
 dim(soybean)
@@ -515,7 +577,8 @@ unique(soybean$class)
 head(soybean)
 ```
 
-In the following a 2d PCA for the entire dataset: one color for each different class. 
+In the following a 2d PCA for the entire dataset: one color for each
+different class.
 
 ```{r}
 
@@ -533,25 +596,4 @@ plot(pca_dat, col=y)
 
 ```
 
-
-
-
 ...todo test clustering on datasets...
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
