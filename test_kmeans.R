@@ -23,7 +23,7 @@ if (use_shapes) {
 }
 
 plot(x=df$X1, y=df$X2, col=colors[df$color], pch=shapes)
-legend("topleft", as.character(seq(1, num_clusters, 1)), cex=.8, col=colors, pch=shap_labels)
+legend("topleft", as.character(seq(1, num_clusters, 1)), cex=.8, col=colors, pch=shap_labels, title="real", text.font=4)
 
 # perform KMeans_rcpp clustering
 km_rc = KMeans_rcpp(
@@ -50,4 +50,4 @@ new_data = centroids[clusters, ]
 
 # plot predictions
 plot(x=df$X1, y=df$X2, col=colors[df$KMeans_rcpp], pch=shapes)
-legend("topleft", as.character(seq(1, num_clusters, 1)), cex=.8, col=colors, pch=shap_labels)
+legend("topleft", as.character(seq(1, num_clusters, 1)), cex=.8, col=colors, pch=shap_labels, title="preds", text.font=4)
