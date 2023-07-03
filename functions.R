@@ -23,18 +23,18 @@ compare_metrics <- function(df, metrics, metrics_abb) {
 }
 
 reorder_data <- function(obj, centroids, items, k=3, i=1, drop_order=T) {
-  obj[centroids][[1]] = sort_centroids_by_ith_coordinate(obj[centroids][[1]], k=k, i=i)
+  obj[[centroids]] = sort_centroids_by_ith_coordinate(obj[[centroids]], k=k, i=i)
   if (length(items) > 0) {
     # 1:0 = c(1,0) e non c(0) ==> if è necessario
     for (i in 1:length(items)) {
-      attr_name = items[i][[1]]
-      item = matrix(obj[attr_name][[1]], nrow=k)
-      obj[attr_name][[1]] = sort_rows_according_to_centroids(item, obj[centroids][[1]][,k])
+      attr_name = items[[i]]
+      item = matrix(obj[[attr_name]], nrow=k)
+      obj[[attr_name]] = sort_rows_according_to_centroids(item, obj[[centroids]][,k])
     }
   }
   if (drop_order) {
     # drop the column with the current order
-    obj[centroids][[1]] = obj[centroids][[1]][,-ncol(obj[centroids][[1]])]    
+    obj[[centroids]] = obj[[centroids]][,-ncol(obj[[centroids]])]    
   }
   return(obj)
 }

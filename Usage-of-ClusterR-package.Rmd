@@ -389,6 +389,7 @@ points(kmeans_rcpp$centroids, pch="X", cex=2, col="azure")
 ```{r}
 kmeans_arma = list()
 kmeans_arma$centroids = matrix(KMeans_arma(df1_no_label, 3), nrow=3)
+kmeans_arma = reorder_data(kmeans_arma, "centroids", list())
 df1["y_3Mn_arma"] = predict_KMeans(df1_no_label, kmeans_arma$centroids)
 ```
 
