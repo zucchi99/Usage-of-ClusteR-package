@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_notebook: default
+  pdf_document: default
 ---
 
 Introduction of package ClusterR.
@@ -157,11 +159,12 @@ df1 = bind_rows(list(
   data.frame(mvrnorm(n = 10 * load_factor, mu = c(0*coeff, 0*coeff), Sigma = matrix(c(.8, 0, 0, 4), ncol = 2)), color=2),
   data.frame(mvrnorm(n = 15 * load_factor, mu = c(3*coeff, 1*coeff), Sigma = matrix(c(3, .7, 0, 2), ncol = 2)), color=3)
 ))
-
+{
 plot(x=df1$X1, y=df1$X2, col=df1$color)
 points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="brown")
 points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="brown")
 points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="brown")
+}
 
 ```
 
@@ -188,13 +191,13 @@ gmm_3 = GMM(x, 3, dist_mode = "maha_dist", seed_mode = "random_subset")
 
 # predict centroids, covariance matrix and weights
 df1["color_pred_3"] = predict(gmm_3, newdata = x)
-
+{
 plot(x=df1$X1, y=df1$X2, col=df1$color_pred_3 + 1)
 points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="black")
 points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="black")
 points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="black")
 points(gmm_3$centroids, pch="X", cex=2, col="azure")
-
+}
 ```
 
 
@@ -236,7 +239,7 @@ gmm_3$weights
 head(gmm_3$Log_likelihood)
 ```
 
-Since it is possible to specify the number of clusters, we tried running the GMM algorithm specifying gaussian_comps=2. 
+Since it is possible to specify the number of clusters, we tried running the GMM algorithm specifying $gaussian\_comps=2$. 
 
 We can see that the clustering still makes sense, even if the external validation statistics are worse. One of the centroids remains on the cluster nr.1, while the other centroid is in the middle of clusters 2 and 3. 
 
@@ -248,13 +251,13 @@ gmm_2 = GMM(x, 2, dist_mode = "maha_dist", seed_mode = "random_subset")
 
 # predict centroids, covariance matrix and weights
 df1["color_pred_2"] = predict(gmm_2, newdata = x)
-
+{
 plot(x=df1$X1, y=df1$X2, col=df1$color_pred_2 + 1)
 points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="black")
 points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="black")
 points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="black")
 points(gmm_2$centroids, pch="X", cex=2, col="azure")
-
+}
 external_validation(df1$color, df1$color_pred_2, summary_stats = T)
 
 ```

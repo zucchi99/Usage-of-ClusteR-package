@@ -11,16 +11,16 @@ imageShow(im)
 # first resize the image to reduce the dimensions
 im = resizeImage(im, 75, 75, method = 'bilinear') 
 
-use_2D = TRUE
+#use_2D = TRUE
 
-if(use_2D){
-  im = grayscale(im)
-  dim = 2
-} else {
-  dim = 3
-}
+#if(use_2D){
+#  im = grayscale(im)
+#  dim = 2
+#} else {
+#  dim = 3
+#}
 
-plot(grayscale(im))
+#plot(grayscale(im))
 
 
 # plot resized image
@@ -33,7 +33,7 @@ im_vec = apply(im, 3, as.vector)
 # perform KMeans_rcpp clustering
 km_rc = KMeans_rcpp(
     data = im_vec, 
-    clusters = 5, 
+    clusters = 10, 
     num_init = 5, 
     max_iters = 100, 
     initializer = 'optimal_init', 
