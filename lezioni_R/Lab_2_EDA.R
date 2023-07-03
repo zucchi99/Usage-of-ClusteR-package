@@ -79,9 +79,16 @@ lines(dens)
 par(opar)
 par(mfrow=c(1,1))
 
-boxplot(ftotlngth, horizontal=TRUE) 
+  boxplot(ftotlngth, horizontal=TRUE) 
 boxplot(possum$footlgth~possum$sex)
 
+possum$sex_num <- unclass(possum$sex)
+plot(possum$totlngth, possum$footlgth, col=possum$sex_num)
+
+possum_clear = na.omit(possum)
+cor_df = subset(possum_clear, select = -c(sex, Pop, case, site, sex_num) )
+cor(cor_df, method = c("pearson"))
+plot(cor_df)
 
 ## Example: the milk data set
 

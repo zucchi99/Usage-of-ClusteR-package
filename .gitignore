@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 Usage-of-ClusteR-package.Rproj
+
+*.aux
+*.out
+*.tex
+*.toc

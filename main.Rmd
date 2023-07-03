@@ -1,10 +1,22 @@
 ---
 title: "Introduction of package ClusterR"
-output: html_notebook
+author: "143095 Francesco Zuccato, xxxxx Alessio Corrado"
+output: pdf_document
+  #enable table of contents
+  #enable numbering sections
+  number_sections: true 
+  toc: true 
 ---
+<!--
+```{r setup, include=False}
+knitr::opts_chunk$set(echo=TRUE)
+```
+-->
+
+
 
 <!--
-#author: "143095 Francesco Zuccato, xxxxx Alessio Corrado"
+
   #enable table of contents
   #enable numbering sections
   #toc: true 
@@ -56,7 +68,7 @@ gaussiane punti generati da PCA di un dataset grande -\> proteine? -->
     - KMeans_arma
     - mini-batch KMeans
     - Optimal_Clusters_KMeans 
-  * Mediod based
+  * Medoid based
     - Cluster_Medoids
     - Clara_Medoids
   * Distribution based clustering
@@ -233,12 +245,12 @@ df1 = bind_rows(list(
   data.frame(mvrnorm(n = 10 * load_factor, mu = c(0*coeff, 0*coeff), Sigma = matrix(c(.8, 0, 0, 4), ncol = 2)), color=2),
   data.frame(mvrnorm(n = 15 * load_factor, mu = c(3*coeff, 1*coeff), Sigma = matrix(c(3, .7, 0, 2), ncol = 2)), color=3)
 ))
-
+{
 plot(x=df1$X1, y=df1$X2, col=df1$color)
 points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="brown")
 points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="brown")
 points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="brown")
-
+}
 ```
 
 The function given by the library to compute Gaussian Mixture Models
@@ -262,12 +274,13 @@ gmm_3 = GMM(x, 3, dist_mode = "maha_dist", seed_mode = "random_subset")
 
 # predict centroids, covariance matrix and weights
 df1["color_pred_3"] = predict(gmm_3, newdata = x)
-
+{
 plot(x=df1$X1, y=df1$X2, col=df1$color_pred_3 + 1)
 points(c(5*coeff), c(5*coeff), pch="1", cex=2, col="black")
 points(c(0*coeff), c(0*coeff), pch="2", cex=2, col="black")
 points(c(3*coeff), c(1*coeff), pch="3", cex=2, col="black")
 points(gmm_3$centroids, pch="X", cex=2, col="azure")
+}
 
 ```
 
