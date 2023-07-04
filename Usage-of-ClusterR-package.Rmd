@@ -594,6 +594,117 @@ for (r in 1:rows) {
 
 
 
+# Execution Time
+
+```{r}
+random_matrix = function(r, c){
+  data.frame(matrix(runif(r*c), nrow=r))
+}
+
+df_times = data.frame()
+
+measure.time = function(df_times, method, rows, f){
+  print(paste0("test ", method, " on ", rows, " rows"))
+  start.time <- Sys.time()
+  t = f()
+  end.time <- Sys.time()
+  time.taken <- end.time - start.time
+  print(time.taken)
+  rbind(df_times, c(method=method, rows=r, features=10, n_clusters=10, time=time.taken))
+} 
+
+for (r in c(100, 1000, 2000, 4000, 6000, 8000, 100000, 20000, 50000, 75000, 100000, 200000, 300000, 400000, 500000, 800000, 1000000, 2000000)){
+  m = random_matrix(r, 10)
+  if (r <= 5000){
+    df_times = measure.time(df_times, "Cluster_Medoids", rows=r, f=function() Cluster_Medoids(m, 10, distance_metric="euclidean") )
+    df_times = measure.time(df_times, "Clara_Medoids", rows=r, f=function() Clara_Medoids(m, 10, samples=4, sample_size=0.1, "euclidean") )
+  }
+  if (r <= 50000){
+    df_times = measure.time(df_times, "KMeans_rcpp", rows=r, f=function() KMeans_rcpp(m, 10) )
+  }
+  if (r <= 500000){
+    df_times = measure.time(df_times, "GMM", rows=r, f=function() GMM(m, 10, dist_mode = "maha_dist", seed_mode = "random_subset") )
+  }
+  
+  df_times = measure.time(df_times, "MiniBatchKmeans", rows=r, f=function() MiniBatchKmeans(m, 10) )
+  df_times = measure.time(df_times, "KMeans_arma", rows=r, f=function() KMeans_arma(m, 10) )
+  
+}
+
+colnames(df_times) = c("method", "rows", "features", "n_clusters", "time")
+df_times
+```
 
 
+
+```{r}
+library(plotly)
+
+df_times$rows = as.integer(df_times$rows)
+df_times$features = as.integer(df_times$features)
+df_times$n_clusters = as.integer(df_times$n_clusters)
+df_times$time = as.double(df_times$time)
+
+fig <- plot_ly(data = df_times, x = ~rows, y = ~time, color = ~method)
+
+fig
+```
+
+Execution time in log scale.
+In order from the slower to the faster (in brackets the approx number of rows clustered in 10 sec):
+- Cluster_Medoids (5 * 10^3)
+- KMeans_rcpp (5 * 10/4)
+- GMM (10^6)
+- MiniBatchKMeans (5 * 10^6)
+- KMeans_arma (10^7)
+
+
+```{r}
+fig <- plot_ly(data = df_times, x = ~log10(rows), y = ~log10(time), color = ~method)
+
+fig
+```
+
+
+# Centroids vs Medoids
+
+The centroids are placed in the space without constraints.
+
+```{r}
+m = random_matrix(10, 2)
+m
+```
+
+
+
+```{r}
+
+kmeans_rcpp = KMeans_rcpp(m, 3)
+kmeans_rcpp = reorder_data(kmeans_rcpp, "centroids", list("WCSS_per_cluster", "obs_per_cluster"))
+kmeans_rcpp$clusters <- NULL #drop it now, it's wrong, use the predict below
+m["y_3Mn_rcpp"] = predict(kmeans_rcpp, newdata = m)
+
+{
+plot(x=m$X1, y=m$X2, col=m$y_3Mn_rcpp + 1)
+points(kmeans_rcpp$centroids, pch="X", cex=1, col="black")
+}
+```
+
+The medoids are constrained to be on top of items. 
+
+
+```{r}
+kmedoids_pam = Cluster_Medoids(m, 3, distance_metric="euclidean")
+
+kmedoids_pam = reorder_data(kmedoids_pam, "medoids", list("medoid_indices"), drop_order=F)
+kmedoids_pam$clusters <- NULL #drop it now, it's wrong, use the predict below
+kmedoids_pam$silhouette_matrix = change_centroids(kmedoids_pam$silhouette_matrix, kmedoids_pam$medoids[,3], c("clusters", "neighbor_clusters"))
+kmedoids_pam$medoids = kmedoids_pam$medoids[,-ncol(kmedoids_pam$medoids)]
+m["y_3Md_pam"] = predict(kmedoids_pam, newdata = m)
+
+{
+plot(x=m$X1, y=m$X2, col=m$y_3Md_pam + 1)
+points(kmedoids_pam$medoids, pch="X", cex=1, col="black")
+}
+```
 

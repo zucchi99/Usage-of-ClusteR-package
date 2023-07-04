@@ -1,0 +1,56 @@
+
+
+```{r}
+
+getwd()
+ls()
+
+
+v = c(1, 2, 3)
+v
+v * 2 + 1
+
+0 * (v == v)&TRUE
+
+rep(c("ciao", "bello"), 20, each=2)[c(2, 3, 4, 7)]
+
+v = c("a", "d", "c", "d", "a", "b")
+v
+factor(v)
+ordered(v, levels=c("c", "b", "a"))
+v[v == "d"]
+
+1:20
+20:1
+
+length(v)
+
+sum(1:19)
+
+cut(c(1:12, 25:38, -3:0), c(-5, 5, 25))
+
+c(1:12, 3:5)
+
+m = matrix(1:16, nrow=4)
+m
+
+t(m)
+apply(m, 1, sum)
+v = c(1:4)
+outer(v, v, "/")
+
+data(airquality)
+dim(airquality)
+help(airquality)
+names(airquality)
+head(airquality)
+str(airquality)
+
+table(head(airquality))
+
+
+
+
+
+```
+
