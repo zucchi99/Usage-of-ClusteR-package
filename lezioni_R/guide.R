@@ -63,6 +63,9 @@ summary(possum$sex)
 # PLOTS
 
 # set graphical parameters
+# old_params = par(new_params) # set new_params and backup original params
+# plot(...)
+# par(old_params) # restore original params
 rows = 1
 cols = 1
 char_size = 1
