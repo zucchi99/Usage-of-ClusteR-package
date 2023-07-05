@@ -3,6 +3,27 @@ library(MASS)
 library(dplyr)
 library(ClusterR)
 
+get_borders <- function(col, pct=0.05, min_pct=0, max_pct=0) { 
+  min_pct = if(min_pct == 0) pct else min_pct
+  max_pct = if(max_pct == 0) pct else max_pct
+  range = (max(col) - min(col))
+  return( c( min(col) - range*min_pct, max(col) + range*max_pct ) )
+}
+
+random_matrix = function(r, c){
+  data.frame(matrix(runif(r*c), nrow=r))
+}
+
+measure.time = function(df_times, method, rows, f){
+  print(paste0("test ", method, " on ", rows, " rows"))
+  start.time <- Sys.time()
+  t = f()
+  end.time <- Sys.time()
+  time.taken <- end.time - start.time
+  print(time.taken)
+  rbind(df_times, c(method=method, rows=r, features=10, n_clusters=10, time=time.taken))
+} 
+
 # assume df to have as input: 
 # - first column: true labels
 # - second to last column: predicted labels
@@ -29,7 +50,7 @@ reorder_data <- function(obj, centroids, items, k=3, i=1, drop_order=T) {
     for (i in 1:length(items)) {
       attr_name = items[[i]]
       item = matrix(obj[[attr_name]], nrow=k)
-      obj[[attr_name]] = sort_rows_according_to_centroids(item, obj[[centroids]][,k])
+      obj[[attr_name]] = sort_rows_according_to_centroids(item, obj[[centroids]][k,])
     }
   }
   if (drop_order) {

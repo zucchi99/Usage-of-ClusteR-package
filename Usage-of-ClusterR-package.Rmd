@@ -18,6 +18,8 @@ library(tidyverse)
 source("functions.R")
 ```
 
+\newpage
+
 # Introduction
 
 ClusterR is an R package for clustering data.
@@ -176,12 +178,12 @@ factor = 100
 coeff = log(base=10, factor)/2 #choose if augmenting distance when generating more points
 # sort points da X coordinate, so will be easier to re-order also the centroids of the gmm / kmeans accordingly
 points_mean = list(
-  c(0, 0), 
+  c(-0.5, 2), 
   c(3, 1),
   c(5, 5)
 )
 points_cov_mat = list(
-  matrix(c(.8, 0, 0, 4),  ncol = 2),
+  matrix(c(0.8, 0, 0, 4),  ncol = 2),
   matrix(c(3, .7, 0, 2),  ncol = 2),
   matrix(c(1, -.6, 0, 1), ncol = 2)
 )
@@ -218,7 +220,7 @@ The package is subdivided in different parts:
 * validation of the clustering goodness using ground truth labels
 * helper methods
 
-## Testing GMM
+## Gaussian Mixture Models
 
 In the library, to compute the Gaussian Mixture Models there is the function \verb|GMM|, which has the following arguments: 
 
@@ -288,8 +290,7 @@ head(gmm_3$Log_likelihood)
 
 
 Since it is possible to specify the number of clusters, we tried running the GMM algorithm specifying $gaussian\_comps=2$. 
-
-We can see that the clustering still makes sense, even if the external validation statistics are worse. One of the centroids remains on the cluster nr.1, while the other centroid is in the middle of clusters 2 and 3. 
+We can see that the clustering does not make sense any more.
 
 
 ```{r echo=TRUE}
@@ -310,35 +311,7 @@ points(gmm_2$centroids, pch="X", cex=2, col="azure")
 external_validation(df1$color, df1$y_2gmm, summary_stats = T)
 ```
 
-## Choose the optimal number of centroids
-
-A non-simple question is how to find the optimal number of centroids? 
-Plotting the data as above with colors only works for small datasets representable in two dimensions. 
-The function \verb|Optimal_Clusters_GMM| calculates the goodness of the fit for each number of clusters between $1$ and $max\_clusters$. 
-
-A criterion to evaluate a model can be either **AIC (Alkaine Information Criterion)** or **BIC (Bayes Information Criterion)**. A rule of thumb is that we should select the smallest (simplest) model with good performances, so the best model should be the one which minimizes one of these criterions. 
-
-
-### Elbow Method
-The elbow method is a well-known heuristic method used to determine the number of clusters. 
-Given the plot with on the y-axis a metric (AIC, BIC, etc) and on the x-axis the number of clusters, the method consists of picking the elbow of the curve as the number of clusters to use. 
-The idea is that the *elbow* can be seen as a **cutoff point** which means that choosing a number of clusters greater than it would not give much better modeling of the data.
-The Elbow Method is pretty simple but can used effectively only when the curve has a clear point where the improvement does not highly increase any more, which can not always be the case.
-
-In the example, we can see that a model with 3 clusters should be fine, because after this value the BIC stops increasing sharply. Models with a lot of clusters have a even lower value for BIC but may be too complex, and probably would just overfit the data. This shows why it is important also to watch the clustering results using a scatterplot, if possible. 
-
-
-```{r echo=TRUE}
-opt_gmm = Optimal_Clusters_GMM(df1_no_label, max_clusters = 10, criterion = "BIC",
-    dist_mode = "eucl_dist", seed_mode = "random_subset", plot_data = T)
-```
-
-<!-- todo add Optimal_Clusters_GMM output manually -->
-
-<!-- todo elbow method -->
-
-
-## Testing K-Means
+## K-Means
 
 ClusterR supports k-means algorithm with two different implementations: \verb|KMeans_arma| and \verb|KMeans_rcpp|.
 Their interface is similar to GMM, but specific for the k-means task. The arguments shared by both are:
@@ -424,7 +397,7 @@ total_test_WCSS
 total_SSE
 ```
 
-## Testing K-Medoids
+## K-Medoids
 
 The most common implementation of the k-medoid is the **Partitioning Around Medoids (PAM)** algorithm, which is based on two stages: **BUILD** and **SWAP**. 
 
@@ -511,6 +484,35 @@ points(kmedoids_pam$medoids, pch="X", cex=2, col="azure")
 }
 ```
 
+## Choice of the optimal number of clusters
+
+A non-simple question is how to find the optimal number of centroids? 
+Plotting the data with colors works only for small datasets representable in two dimensions. 
+
+In the package there is, foreach method, a method that iterates over $k$ to find the best fit: \verb|Optimal_Clusters_GMM|, \verb|Optimal_Clusters_KMeans| and \verb|Optimal_Clusters_Medoids|. They look for a $k \in \{1,2,..,max\_clusters\}$, where $max\_clusters$ is a fixed parameter.
+
+A criterion to evaluate a model can be either **AIC (Alkaine Information Criterion)** or **BIC (Bayes Information Criterion)**. A rule of thumb is that we should select the smallest (simplest) model with good performances, so the best model should be the one which minimizes one of these criterions. 
+
+
+### Elbow Method
+The elbow method is a well-known heuristic method used to determine the number of clusters. 
+Given the plot with on the y-axis a metric (AIC, BIC, etc) and on the x-axis the number of clusters, the method consists of picking the elbow of the curve as the number of clusters to use. 
+The idea is that the *elbow* can be seen as a **cutoff point** which means that choosing a number of clusters greater than it would not give much better modeling of the data.
+The Elbow Method is pretty simple but can used effectively only when the curve has a clear point where the improvement does not highly increase any more, which can not always be the case.
+
+In the example, we can see that a model with 3 clusters should be fine, because after this value the BIC stops decreasing sharply. 
+Models with a lot of clusters have an even lower value for the BIC but may be too complex, and probably they just overfit the data. 
+This example shows why it is important also to see the clustering results using a scatterplot, if possible. 
+
+
+```{r echo=TRUE}
+opt_gmm = Optimal_Clusters_GMM(df1_no_label, max_clusters = 10, criterion = "BIC",
+    dist_mode = "eucl_dist", seed_mode = "random_subset", plot_data = T)
+```
+
+<!-- todo add Optimal_Clusters_GMM output manually -->
+
+
 ## Silhouette Dissimilarity Plot
 
 The Silhouette Dissimilarity provides an easy graphical representation of how well each object has been associated to its own cluster (**cohesion**) compared to other clusters (**separation**). 
@@ -535,7 +537,9 @@ invisible(Silhouette_Dissimilarity_Plot(kmedoids_pam, silhouette = FALSE))
 
 <!-- TODO add manually Silhouette_Dissimilarity_Plot -->
 
-# Performance Comparisons (ALL vs ALL)
+# Methods Comparisons
+
+## Comparisons on predictions metrics
 
 Often is useful to compare models to seek for the best, to understand which are the possible limitations of another etc.
 Given the overall statistics of the different algorithms launched with the different parameters, 
@@ -591,120 +595,306 @@ for (r in 1:rows) {
 }
 ```
 
+## Comparisons on execution time
 
-
-
-# Execution Time
+Finally, some some tests were run to compare the execution time of the various algorithms, with an increasing number of elements: from 100 to 2 millions.
+Note that, not all of the algorithms were executed with all sizes, since some of them are designed only for small or medium size datasets.
+The data was generated with a uniform distribution on 10 different variables.
+Although both \verb|Clara_Medoids| and \verb|KMeans_arma| can work in parallel, it was decided to run all the algorithms in the sequentially mode. The code for the generation is available in the file *"clustering_exec_times.R"*, here we import directly the csv with the results.
+Note also that the \verb|Clara_Medoids| will be impacted from the choice of sampling's parameters, and we opted for 2 samplings with 5% each.
 
 ```{r}
-random_matrix = function(r, c){
-  data.frame(matrix(runif(r*c), nrow=r))
+df_times = read.csv("clustering_exec_times.csv")
+{
+plot(time ~ rows, data=df_times, col=color, xlim = get_borders(rows, pct=0.05), 
+     ylim = get_borders(time, max_pct=0.4))
+for (i in unique(df_times$color)) {
+  abline(lm(time ~ rows, data=df_times[df_times$color == i,]), col=i, lwd=1) 
 }
-
-df_times = data.frame()
-
-measure.time = function(df_times, method, rows, f){
-  print(paste0("test ", method, " on ", rows, " rows"))
-  start.time <- Sys.time()
-  t = f()
-  end.time <- Sys.time()
-  time.taken <- end.time - start.time
-  print(time.taken)
-  rbind(df_times, c(method=method, rows=r, features=10, n_clusters=10, time=time.taken))
-} 
-
-for (r in c(100, 1000, 2000, 4000, 6000, 8000, 100000, 20000, 50000, 75000, 100000, 200000, 300000, 400000, 500000, 800000, 1000000, 2000000)){
-  m = random_matrix(r, 10)
-  if (r <= 5000){
-    df_times = measure.time(df_times, "Cluster_Medoids", rows=r, f=function() Cluster_Medoids(m, 10, distance_metric="euclidean") )
-    df_times = measure.time(df_times, "Clara_Medoids", rows=r, f=function() Clara_Medoids(m, 10, samples=4, sample_size=0.1, "euclidean") )
-  }
-  if (r <= 50000){
-    df_times = measure.time(df_times, "KMeans_rcpp", rows=r, f=function() KMeans_rcpp(m, 10) )
-  }
-  if (r <= 500000){
-    df_times = measure.time(df_times, "GMM", rows=r, f=function() GMM(m, 10, dist_mode = "maha_dist", seed_mode = "random_subset") )
-  }
-  
-  df_times = measure.time(df_times, "MiniBatchKmeans", rows=r, f=function() MiniBatchKmeans(m, 10) )
-  df_times = measure.time(df_times, "KMeans_arma", rows=r, f=function() KMeans_arma(m, 10) )
-  
+legend("top", unique(df_times$method), fill=unique(df_times$color), 
+       border="black", ncol=3, cex = 1)
 }
-
-colnames(df_times) = c("method", "rows", "features", "n_clusters", "time")
-df_times
 ```
-
-
+Since the visualization of the results is quite difficult in the normal scale, below is given the plot in the log-log scale.
 
 ```{r}
-library(plotly)
-
-df_times$rows = as.integer(df_times$rows)
-df_times$features = as.integer(df_times$features)
-df_times$n_clusters = as.integer(df_times$n_clusters)
-df_times$time = as.double(df_times$time)
-
-fig <- plot_ly(data = df_times, x = ~rows, y = ~time, color = ~method)
-
-fig
+{
+plot(log(time) ~ log(rows), data=df_times, col=color, xlim = get_borders(log(rows)), 
+     ylim = get_borders(log(time), max_pct=0.4))
+legend("top", unique(df_times$method), fill=unique(df_times$color), 
+       border="black", ncol=3)
+}
 ```
 
-Execution time in log scale.
-In order from the slower to the faster (in brackets the approx number of rows clustered in 10 sec):
-- Cluster_Medoids (5 * 10^3)
-- KMeans_rcpp (5 * 10/4)
-- GMM (10^6)
-- MiniBatchKMeans (5 * 10^6)
-- KMeans_arma (10^7)
+From the chart is clear how a ranking on the execution times of the methods would look like.
+Moreover, we derived the approximate numbers of rows clustered in 1 second per each method, which are the following (ordered from the slower to the faster):
 
+```{r include=FALSE}
+effiency_df = as.matrix(rbind(
+    c("Cluster_Medoids", 5 * 10^2),
+    c("KMeans_rcpp", 5 * 10^3),
+    c("GMM", 5 * 10^5),
+    c("MiniBatchKMeans", 5 * 10^5),
+    c("KMeans_arma", 10^6)
+))
+colnames(effiency_df) <- c("method", "rows/s")
+```
 
 ```{r}
-fig <- plot_ly(data = df_times, x = ~log10(rows), y = ~log10(time), color = ~method)
-
-fig
+effiency_df
 ```
 
+
+From the normal-scaled plot there is also a strong evidence that all the methods, apart the medoids-based excluded, have a linear complexity.
+The medoids algorithms instead are very slow. Since they both calculate the dissimilarity matrix, they should have a complexity (at least) quadratic.
+Of course, the \verb|Cluster_Medoids| is slower since the matrix is calculated for all observations ($n^2$), meanwhile the \verb|Clara_Medoids| only for the ones sampled (in our case $\leq (2*0.05*n)^2$).
+From the first plot it is not clear if a quadratic curve is present, because all the points are shrinked.
+So, we plot again the data in the normal-scale, but only for the latter methods, looking for curves instead of straight lines.
+
+```{r}
+medoids_df = df_times[df_times$color<=2,]
+{
+plot(time ~ rows, data=medoids_df, col=color, 
+     xlim = get_borders(rows, pct=0.05), ylim = get_borders(time, pct=0.05))
+legend("top", unique(medoids_df$method), fill=unique(medoids_df$color), 
+       border="black", ncol=2, cex = 0.8)
+with(medoids_df[medoids_df$color==1,], lines(lowess(rows, time), col=1))
+with(medoids_df[medoids_df$color==2,], lines(lowess(rows, time), col=2))
+}
+```
+
+From the above chart is clear that the experimental results confirm the non-linearity expectations.
 
 # Centroids vs Medoids
 
-The centroids are placed in the space without constraints.
+Last but not least, we wanted to highlight the different behaviour between centroid-based and medoid-based algorithms.
+In order to so, we created a very small dataset with just 10 random elements on 2-dimensional space.
+The elements are just random (from a normal distribution in $[0,1]$) so the outcomes of the two methods could be totally different.
+One thing there for sure will emerge is that the centroids will be placed in the middle of each cluster, meanwhile the medoids will be constrained to be one of the elements of the dataset, but probably not really a median point.
+
+Watching the plot below, looking for clusters seems not a great idea.
 
 ```{r}
+set.seed(47)
 m = random_matrix(10, 2)
-m
+colnames(m) <- c("X", "Y")
+{
+par(pty="s")
+plot(x=m$X, y=m$Y, xlim=c(0,1), ylim=c(0,1))
+}
 ```
 
 
 
+
 ```{r}
-
 kmeans_rcpp = KMeans_rcpp(m, 3)
-kmeans_rcpp = reorder_data(kmeans_rcpp, "centroids", list("WCSS_per_cluster", "obs_per_cluster"))
-kmeans_rcpp$clusters <- NULL #drop it now, it's wrong, use the predict below
-m["y_3Mn_rcpp"] = predict(kmeans_rcpp, newdata = m)
-
+m["k_means"] = predict(kmeans_rcpp, newdata = m)
 {
-plot(x=m$X1, y=m$X2, col=m$y_3Mn_rcpp + 1)
+par(pty="s")
+plot(x=m$X, y=m$Y, col=m$k_means + 1, xlim=c(0,1), ylim=c(0,1))
 points(kmeans_rcpp$centroids, pch="X", cex=1, col="black")
 }
 ```
 
-The medoids are constrained to be on top of items. 
-
 
 ```{r}
 kmedoids_pam = Cluster_Medoids(m, 3, distance_metric="euclidean")
-
-kmedoids_pam = reorder_data(kmedoids_pam, "medoids", list("medoid_indices"), drop_order=F)
-kmedoids_pam$clusters <- NULL #drop it now, it's wrong, use the predict below
-kmedoids_pam$silhouette_matrix = change_centroids(kmedoids_pam$silhouette_matrix, kmedoids_pam$medoids[,3], c("clusters", "neighbor_clusters"))
-kmedoids_pam$medoids = kmedoids_pam$medoids[,-ncol(kmedoids_pam$medoids)]
-m["y_3Md_pam"] = predict(kmedoids_pam, newdata = m)
-
+m["k_medoids"] = predict(kmedoids_pam, newdata = m)
 {
-plot(x=m$X1, y=m$X2, col=m$y_3Md_pam + 1)
+par(pty="s")
+plot(x=m$X, y=m$Y, col=m$k_medoids + 1, xlim=c(0,1), ylim=c(0,1))
 points(kmedoids_pam$medoids, pch="X", cex=1, col="black")
 }
 ```
+
+The two algorithms produced different outcomes, and is evident that the k-medoids is constrained to place the medoids on top on the elements.
+
+
+# Datasets
+
+In the package there are also 3 different datasets: 
+
+-   **dietary_survey_IBS**: Synthetic data using a dietary survey of patients with irritable bowel syndrome
+-   **mushroom**: mushroom data
+-   **soybean**: soybean (large) data set from the UCI repository.
+
+
+## Dietary Survey IBS
+
+**Dietary Survey IBS** contains synthetic data generated using the mean and standard deviation of data used in the paper *"A dietary survey of patients with irritable bowel syndrome"*.
+
+```{r eval=FALSE, include=FALSE}
+help(dietary_survey_IBS)
+table(dietary_survey_IBS$class)
+dim(dietary_survey_IBS)
+head(dietary_survey_IBS)
+```
+
+It contains 400 rows and 43 columns where
+
+ - *class* is the binary predictor variable, divided in half: 200 healthy ($class=0$) and 200 IBS-positive  ($class=1$). 
+ - the other 42 columns are the numeric predictor variables and they are all continuous
+
+```{r}
+data(dietary_survey_IBS)
+colnames(dietary_survey_IBS)
+```
+
+We reduced the dataset into just 2D using the PCA. 
+Although we brutally decreased the dimensions, the samples of the two classes are still divided into two quite distinct clusters, as visible in the plot:
+
+```{r}
+pca_ibs = as.data.frame(stats::princomp(dietary_survey_IBS)$scores[, 1:2])
+pca_ibs = cbind(pca_ibs, dietary_survey_IBS$class + 1)
+colnames(pca_ibs) <- c("X1", "X2", "class")
+pca_ibs_no_lbl = pca_ibs[,-3]
+
+centroids_0 = with(pca_ibs[pca_ibs$class==1,], list(c(mean(X1), mean(X2))))
+centroids_1 = with(pca_ibs[pca_ibs$class==2,], list(c(mean(X1), mean(X2))))
+centroids_ibs = list(centroids_0[[1]], centroids_1[[1]])
+
+{
+colors_ibs = pca_ibs$class + 2
+plot(pca_ibs_no_lbl, col=colors_ibs)
+plot_points(centroids_ibs, num_points=2)
+legend("topleft", c("healthy", "IBS-positive"), fill=unique(colors_ibs), border="black")
+}
+```
+
+We applied a 2D KMeans to try to predict such clusters.
+
+```{r echo=TRUE}
+kmeans_ibs = KMeans_rcpp(pca_ibs_no_lbl, 2)
+kmeans_ibs = reorder_data(kmeans_ibs, "centroids", list("WCSS_per_cluster", "obs_per_cluster"), k=2)
+pca_ibs["y_2KM"] = predict(kmeans_ibs, newdata = pca_ibs_no_lbl)
+```
+
+```{r echo=FALSE}
+{
+plot(x=pca_ibs$X1, y=pca_ibs$X2, col=pca_ibs$y_2KM + 2)
+plot_points(centroids_ibs, num_points=2)
+points(kmeans_ibs$centroids, pch="X", cex=2, col="grey40")
+legend("topleft", c("healthy", "IBS-positive"), fill=unique(colors_ibs), border="black")
+}
+```
+
+```{r eval=FALSE, include=FALSE}
+external_validation(pca_ibs$class, pca_ibs$y_2KM, summary_stats = T)
+```
+
+## Mushroom
+
+*mushroom* includes descriptions of hypothetical samples corresponding to 23 species of gilled mushrooms in the Agaricus and Lepiota Family (pp. 500-525). 
+
+Each species can either be edible or poisonous. The Guide clearly states that there is no simple rule for determining the edibility of a mushroom; no rule like 'leaflets three, let it be' for Poisonous Oak and Ivy. For simplicity the unknown targets are marked as poisonous. 
+
+
+```{r eval=FALSE, include=FALSE}
+help(mushroom)
+```
+
+It contains 8124 rows and 23 columns:
+
+ - *"class"* is the target column. Its values are "p" and "e", with "p" meaning poisonous (or unknown), int the 52% of the asmples, and "e" meaning "edible", in the remaining 48%
+ - the other 22 columns contain one character each and can be used as predictors
+
+
+```{r eval=FALSE, include=FALSE}
+dim(mushroom)
+colnames(mushroom)
+unique(mushroom$class)
+head(mushroom)
+```
+
+In the following a 2D PCA on the entire dataset is applied. black class 0 (edible) and red for class 1 (poisonous). 
+
+```{r}
+data(mushroom)
+X = mushroom[1:1000, -1]
+y = as.numeric(mushroom[1:1000, 1])
+
+gwd = FD::gowdis(X)           
+gwd_mr = as.matrix(gwd)
+pca_mr = as.data.frame(stats::princomp(gwd_mr)$scores[, 1:2])
+pca_mr = cbind(pca_mr, y)
+colnames(pca_mr) <- c("X1", "X2", "class")
+centroids_mr = with(pca_mr[pca_mr$class==2,], list(c(mean(X1), mean(X2))))
+pca_mr_no_lbl = pca_mr[-3]
+{
+plot(pca_mr_no_lbl, col=y+2)
+plot_points(centroids_mr, num_points=1)
+legend("topleft", c("poisonous", "edible"), fill=unique(y+2), border="black")
+}
+```
+Also in this case, although we transformed the dataset from 22D to just 2D, the samples of the two classes are still divided into different clusters, as visible in the plot. There are 4 clusters 
+
+We applied a 2D KMeans to try to predict such clusters.
+
+```{r echo=TRUE}
+kmeans_mr = KMeans_rcpp(pca_mr_no_lbl, 6)
+kmeans_mr = reorder_data(kmeans_mr, "centroids", list("WCSS_per_cluster", "obs_per_cluster"), k=6)
+pca_mr["y_6KM"] = predict(kmeans_mr, newdata = pca_mr_no_lbl)
+```
+
+```{r echo=FALSE}
+{
+plot(x=pca_mr$X1, y=pca_mr$X2, col=pca_mr$y_6KM + 2)
+plot_points(centroids_mr, num_points=1)
+points(kmeans_mr$centroids, pch="X", cex=2, col="grey40")
+legend("topleft", c("healthy", "IBS-positive"), fill=unique(colors_ibs), border="black")
+}
+```
+
+
+## Soybean
+
+*soybean* contains a dataset about soybeans characteristics from UCI machine learning repository. 
+
+There are both categorical and ordinal values, encoded by integers. Missing values were imputated using the mice package.
+
+
+```{r}
+help(soybean)
+```
+
+It contains 307 rows and 36 columns. 
+
+"class" is the target column. Its values are "diaporthe-stem-canker", "charcoal-rot", "rhizoctonia-root-rot", "phytophthora-rot", "brown-stem-rot", "powdery-mildew", "downy-mildew", "brown-spot", "bacterial-blight", "bacterial-pustule", "purple-seed-stain", "anthracnose", "phyllosticta-leaf-spot", "alternarialeaf-spot", "frog-eye-leaf-spot", "diaporthe-pod-&-stem-blight", "cyst-nematode", "2-4-d-injury" and "herbicide-injury". 
+
+The other 25 columns contain one integer each and can be used as predictors. 
+
+
+```{r}
+dim(soybean)
+
+colnames(soybean)
+
+unique(soybean$class)
+
+head(soybean)
+```
+
+In the following a 2d PCA for the entire dataset: one color for each different class. 
+
+```{r}
+
+
+X = soybean[, -1]
+
+y = as.numeric(soybean[, 1])            
+
+gwd = FD::gowdis(X)           
+
+gwd_mat = as.matrix(gwd)                 
+
+pca_dat = stats::princomp(gwd_mat)$scores[, 1:2]
+plot(pca_dat, col=y)
+
+```
+
+
+
+
+
 
