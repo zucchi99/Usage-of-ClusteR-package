@@ -104,9 +104,10 @@ positions to optimize the clustering. The k-medoid algorithms is a
 variation of k-means, which changes the way to calculate the center of each cluster:
 
  - **k-means**: uses the mean of all its points (which is not necessarily a point of the cluster)
-   * pros: center of the cluster coincides with the mean point over all its coordinates
+   * pros: algorithms are linear in time complexity
  - **k-medoids** uses the median point of the cluster (so a point of the cluster)
-   * pros: center of the cluster coincides is not influenced by noise or outliers.
+   * pros: is less influenced by noise or outliers.
+   * cons: algorithms are quadratic in time complexity
    
  
 ## Distribution based 
@@ -615,34 +616,18 @@ legend("top", unique(df_times$method), fill=unique(df_times$color),
        border="black", ncol=3, cex = 1)
 }
 ```
-Since the visualization of the results is quite difficult in the normal scale, below is given the plot in the log-log scale.
+Since the visualization of the results is quite difficult in the linear scale, below is given the plot in the log-log scale.
 
 ```{r}
 {
-plot(log(time) ~ log(rows), data=df_times, col=color, xlim = get_borders(log(rows)), 
-     ylim = get_borders(log(time), max_pct=0.4))
+plot(log10(time) ~ log10(rows), data=df_times, col=color, xlim = get_borders(log10(rows)), 
+     ylim = get_borders(log10(time), max_pct=0.4))
 legend("top", unique(df_times$method), fill=unique(df_times$color), 
        border="black", ncol=3)
 }
 ```
 
 From the chart is clear how a ranking on the execution times of the methods would look like.
-Moreover, we derived the approximate numbers of rows clustered in 1 second per each method, which are the following (ordered from the slower to the faster):
-
-```{r include=FALSE}
-effiency_df = as.matrix(rbind(
-    c("Cluster_Medoids", 5 * 10^2),
-    c("KMeans_rcpp", 5 * 10^3),
-    c("GMM", 5 * 10^5),
-    c("MiniBatchKMeans", 5 * 10^5),
-    c("KMeans_arma", 10^6)
-))
-colnames(effiency_df) <- c("method", "rows/s")
-```
-
-```{r}
-effiency_df
-```
 
 
 From the normal-scaled plot there is also a strong evidence that all the methods, apart the medoids-based excluded, have a linear complexity.
@@ -664,6 +649,64 @@ with(medoids_df[medoids_df$color==2,], lines(lowess(rows, time), col=2))
 ```
 
 From the above chart is clear that the experimental results confirm the non-linearity expectations.
+
+At this point, we fitted a linear model for each clustering method in order to find the constants. 
+The linear models are all in form $time = a_1 rows + a_2 rows^2 + a_3$, in order to catch both linear and quadratic behaviors.
+The auxiliary variable $rows^2$, or \verb|rows_squared|, is precomputed for the entire dataset before the model fitting. 
+
+
+```{r}
+df_times$rows_squared = df_times$rows ^ 2
+```
+
+
+We can see from the t-value that \verb|Cluster_Medoids| execution time goes with the square of the number of rows. 
+
+```{r}
+t = df_times %>% filter(method == 'Cluster_Medoids')
+model = lm(time ~ rows + rows_squared, data = t)
+summary(model)
+```
+
+
+Also \verb|Clara_Medoids| execution time goes with the square of the number of rows, with a much smaller constant than \verb|Cluster_Medoids|. 
+
+
+```{r}
+t = df_times %>% filter(method == 'Clara_Medoids')
+model = lm(time ~ rows + rows_squared, data = t)
+summary(model)
+```
+
+\verb|KMeans_rcpp|,\verb|GMM|,\verb|MiniBatchKmeans| and \verb|KMeans_arma| execution time, according to the t-values, go linearly with the number of rows.
+
+```{r}
+t = df_times %>% filter(method == 'KMeans_rcpp')
+model = lm(time ~ rows + rows_squared, data = t)
+summary(model)
+```
+
+Also \verb|GMM| is linear in the number of rows.
+
+```{r}
+t = df_times %>% filter(method == 'GMM')
+model = lm(time ~ rows + rows_squared, data = t)
+summary(model)
+```
+
+
+```{r}
+t = df_times %>% filter(method == 'MiniBatchKmeans')
+model = lm(time ~ rows + rows_squared, data = t)
+summary(model)
+```
+
+
+```{r}
+t = df_times %>% filter(method == 'KMeans_arma')
+model = lm(time ~ rows + rows_squared, data = t)
+summary(model)
+```
 
 # Centroids vs Medoids
 
@@ -724,22 +767,17 @@ In the package there are also 3 different datasets:
 
 **Dietary Survey IBS** contains synthetic data generated using the mean and standard deviation of data used in the paper *"A dietary survey of patients with irritable bowel syndrome"*.
 
-```{r eval=FALSE, include=FALSE}
-help(dietary_survey_IBS)
-table(dietary_survey_IBS$class)
+```{r}
+data(dietary_survey_IBS)
 dim(dietary_survey_IBS)
-head(dietary_survey_IBS)
+colnames(dietary_survey_IBS)
+summary(dietary_survey_IBS$class)
 ```
 
 It contains 400 rows and 43 columns where
 
  - *class* is the binary predictor variable, divided in half: 200 healthy ($class=0$) and 200 IBS-positive  ($class=1$). 
  - the other 42 columns are the numeric predictor variables and they are all continuous
-
-```{r}
-data(dietary_survey_IBS)
-colnames(dietary_survey_IBS)
-```
 
 We reduced the dataset into just 2D using the PCA. 
 Although we brutally decreased the dimensions, the samples of the two classes are still divided into two quite distinct clusters, as visible in the plot:
@@ -800,11 +838,10 @@ It contains 8124 rows and 23 columns:
  - the other 22 columns contain one character each and can be used as predictors
 
 
-```{r eval=FALSE, include=FALSE}
+```{r}
 dim(mushroom)
 colnames(mushroom)
-unique(mushroom$class)
-head(mushroom)
+summary(mushroom$class)
 ```
 
 In the following a 2D PCA on the entire dataset is applied. black class 0 (edible) and red for class 1 (poisonous). 
@@ -842,8 +879,10 @@ pca_mr["y_6KM"] = predict(kmeans_mr, newdata = pca_mr_no_lbl)
 plot(x=pca_mr$X1, y=pca_mr$X2, col=pca_mr$y_6KM + 2)
 plot_points(centroids_mr, num_points=1)
 points(kmeans_mr$centroids, pch="X", cex=2, col="grey40")
-legend("topleft", c("healthy", "IBS-positive"), fill=unique(colors_ibs), border="black")
+legend("topleft", c("healthy"), fill=c("turquoise1"), border="black")
 }
+
+unique(colors_ibs)
 ```
 
 
@@ -852,11 +891,6 @@ legend("topleft", c("healthy", "IBS-positive"), fill=unique(colors_ibs), border=
 *soybean* contains a dataset about soybeans characteristics from UCI machine learning repository. 
 
 There are both categorical and ordinal values, encoded by integers. Missing values were imputated using the mice package.
-
-
-```{r}
-help(soybean)
-```
 
 It contains 307 rows and 36 columns. 
 
@@ -870,9 +904,8 @@ dim(soybean)
 
 colnames(soybean)
 
-unique(soybean$class)
+summary(soybean$class)
 
-head(soybean)
 ```
 
 In the following a 2d PCA for the entire dataset: one color for each different class. 
@@ -882,7 +915,7 @@ In the following a 2d PCA for the entire dataset: one color for each different c
 
 X = soybean[, -1]
 
-y = as.numeric(soybean[, 1])            
+y = as.numeric(soybean$class)            
 
 gwd = FD::gowdis(X)           
 
@@ -893,7 +926,7 @@ plot(pca_dat, col=y)
 
 ```
 
-
+We can see that there is no obvious clustering that well separates the labels. There are some denser region with the same color. 
 
 
 
