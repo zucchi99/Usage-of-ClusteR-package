@@ -138,7 +138,7 @@ The goal is to estimate the parameter $\theta_k = (\mu_k, \Sigma_k, \pi_k)$, whe
 
  - **mean $\mu_k$**: defines the center
  - **covariance matrix $\Sigma_k$**: defines the width
- - **"size" $\pi_k$**: defines how big the function will be ($\pi_k$ is a probability itself, so: $\Sigma_{i=1}^K \pi_i = 1$)
+ - **weight $\pi_k$**: defines the weight in percentage of each component ($\pi_k$ is a probability itself, so: $\Sigma_{i=1}^K \pi_i = 1$)
 
 To discover the above parameters, Expectation-Maximization (EM) Algorithm is used.
 Basically, is based on two alternating steps:
@@ -149,8 +149,8 @@ Basically, is based on two alternating steps:
 ## Density based
 
 Density-based clustering groups data using distance between points.
-Dense connected regions of points should be part of the same cluster. In
-this way there is not a fixed number of clusters, but the number of
+Dense connected regions of points should be part of the same cluster. 
+In this way there is not a fixed number of clusters, but the number of
 clusters depends on the data distribution and the chosen density threshold. 
 
 Algorithms in this class: DBSCAN, OPTICS.
@@ -259,7 +259,14 @@ It is also possible to use the function \verb|plot_2d|, defined by by the Cluste
 plot_2d(data = df1_no_label, clusters = df1$y_3gmm, centroids_medoids = gmm_3$centroids)
 ```
 
-<!-- todo add plot_2d output manually -->
+
+<!-- bug in knit does not show plot, add image manually: -->
+
+```{r echo = FALSE, message=FALSE, fig.align='center', out.width='0.9\\linewidth', fig.pos='H'}
+knitr::include_graphics("./images/plot_2d.png")
+```
+
+
 
 The function \verb|external_validation|, also defined in the ClusterR package, gives us the possibility to extract some useful metrics measuring the goodness of the fit. It requires only the predicted values and annotated values. 
 
@@ -277,7 +284,7 @@ The GMM object returned by the function is a list with 5 components:
 
 - **centroids**: a matrix $\in \mathbb{R}^{k*d}$ that specifies the position of each centroid
 - **covariance_matrices**: a matrix $\in \mathbb{R}^{k*d}$ that specifies the diagonal values of each covariance matrix
-- **weights** a vector $\in \mathbb{R}^{k}$ for each gaussian component (list)
+- **weights** a vector $\in \mathbb{R}^{k}$, with the percentage of weight of each gaussian component
 - **Log_likelihood**: a matrix $\in \mathbb{R}^{n*k}$ foreach training item
 - **call**: a list containing the values of the parameters used in the invocation
 
@@ -333,7 +340,7 @@ The \verb|KMeans_rcpp| object returned by the function is a list with 8 componen
 
 - **call**, **centroids**: as for the \verb|GMM|
 - **clusters**: a vector of $n$ elements with the predicted cluster foreach item
-- **best_initialization**: an integer indicating which was the best initialization (useful when $num_init > 1$)
+- **best_initialization**: an integer indicating which was the best initialization (useful when $num\_init > 1$)
 - some metrics: **total_SSE** (squared distance of each point to its centroid), **WCSS_per_cluster**, **obs_per_cluster** (counts items predicted per cluster)
 
 
@@ -510,8 +517,11 @@ opt_gmm = Optimal_Clusters_GMM(df1_no_label, max_clusters = 10, criterion = "BIC
     dist_mode = "eucl_dist", seed_mode = "random_subset", plot_data = T)
 ```
 
-<!-- todo add Optimal_Clusters_GMM output manually -->
+<!-- bug in knit does not show plot, add Optimal_Clusters_GMM image manually: -->
 
+```{r echo = FALSE, message=FALSE, fig.align='center', out.width='0.9\\linewidth', fig.pos='H'}
+knitr::include_graphics("./images/optimal_clusters_gmm.png")
+```
 
 ## Silhouette Dissimilarity Plot
 
@@ -531,11 +541,25 @@ In the package there is the function \verb|Silhouette_Dissimilarity_Plot|, which
 invisible(Silhouette_Dissimilarity_Plot(kmedoids_pam, silhouette = TRUE))
 ```
 
+<!-- bug in knit does not show plot, add image manually: -->
+
+```{r echo = FALSE, message=FALSE, fig.align='center', out.width='0.9\\linewidth', fig.pos='H'}
+knitr::include_graphics("./images/silhouette_plot_T.png")
+```
+
+
 ```{r}
 invisible(Silhouette_Dissimilarity_Plot(kmedoids_pam, silhouette = FALSE))
 ```
 
-<!-- TODO add manually Silhouette_Dissimilarity_Plot -->
+
+<!-- bug in knit does not show plot, add image manually: -->
+
+```{r echo = FALSE, message=FALSE, fig.align='center', out.width='0.9\\linewidth', fig.pos='H'}
+knitr::include_graphics("./images/silhouette_plot_F.png")
+```
+
+
 
 # Methods Comparisons
 
@@ -648,61 +672,109 @@ with(medoids_df[medoids_df$color==2,], lines(lowess(rows, time), col=2))
 
 From the above chart is clear that the experimental results confirm the non-linearity expectations.
 
-At this point, we fitted a linear model for each clustering method in order to find the constants. 
-The linear models are all in form $time = a_1 rows + a_2 rows^2 + a_3$, in order to catch both linear and quadratic behaviors.
+### Linear Models
+
+At this point, for each method three possible linear models were considered: linear (**model_l**, only *rows*), quadratic (**model_q**, only *rows_squared*), sum of both  (**model_lq**, *rows* + *rows_squared*).
+The model **model_lq** has the following form: $time = a_1 rows + a_2 rows^2 + a_3$.
 The auxiliary variable $rows^2$, or \verb|rows_squared|, is pre-computed for the entire dataset before the model fitting. 
 
+For brevity we will avoid to print for all the methods the summary of each model.
+We will just choose the best model using \verb|BIC| calculated with the \verb|drop1| and then check the best model with the summary. 
+Note that to calculate the \verb|BIC| instead of the \verb|AIC| is necessary to set $k=log(n)$ in the parameters of the \verb|drop1|.
+
+From the theory and visually from the plots we expect the medoids algorithms to be quadratic, and the other ones to be linear.
 
 ```{r}
 df_times$rows_squared = df_times$rows ^ 2
 ```
 
-
-We can see from the t-value that \verb|Cluster_Medoids| execution time goes with squared complexity. 
+We can see from that \verb|Cluster_Medoids| execution time goes with squared complexity. 
 
 ```{r}
 t = df_times %>% filter(method == 'Cluster_Medoids')
-model = lm(time ~ rows + rows_squared, data = t)
-summary(model)
+model_l = lm(time ~ rows, data = t, weights=1/rows)
+model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
+model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
+drop1(model_lq)  # drop1: linear vs quadratic vs both
 ```
 
+```{r}
+summary(model_q) # summary of the model with lowest BIC
+```
 
-Also \verb|Clara_Medoids| execution time goes with the square of the number of rows, with a much smaller constant than \verb|Cluster_Medoids|. 
-
+Also \verb|Clara_Medoids| execution time goes with the square of the number of rows, but with a much smaller constant than \verb|Cluster_Medoids|. 
 
 ```{r}
 t = df_times %>% filter(method == 'Clara_Medoids')
-model = lm(time ~ rows + rows_squared, data = t)
-summary(model)
+model_l = lm(time ~ rows, data = t, weights=1/rows)
+model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
+model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
+drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
 ```
 
-\verb|KMeans_rcpp|,\verb|GMM|,\verb|MiniBatchKmeans| and \verb|KMeans_arma| execution times, according to the t-values, are linear in the number of input rows.
+```{r}
+summary(model_q) # summary of the model with lowest BIC
+```
+
+\verb|KMeans_rcpp|, \verb|GMM|, \verb|MiniBatchKmeans| and \verb|KMeans_arma| execution times are linear in the input size:
 
 ```{r}
 t = df_times %>% filter(method == 'KMeans_rcpp')
-model = lm(time ~ rows + rows_squared, data = t)
-summary(model)
+model_l = lm(time ~ rows, data = t, weights=1/rows)
+model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
+model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
+drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
 ```
 
+Since the **model_lq** seems not bad, we also show its coefficients, the quadratic one is so small that in fact can be removed in favor of a simpler model without it.
+
+```{r}
+model_lq$coefficients # check coefficient values of LQ
+```
+
+The **model_l** seems totally fine:
+
+```{r}
+summary(model_l) # summary of the model with lowest BIC
+```
+Same considerations apply to the others methods as well:
 
 ```{r}
 t = df_times %>% filter(method == 'GMM')
-model = lm(time ~ rows + rows_squared, data = t)
-summary(model)
+model_l = lm(time ~ rows, data = t, weights=1/rows)
+model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
+model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
+drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
+```
+
+```{r}
+summary(model_l) # summary of the model with lowest BIC
 ```
 
 
 ```{r}
 t = df_times %>% filter(method == 'MiniBatchKmeans')
-model = lm(time ~ rows + rows_squared, data = t)
-summary(model)
+model_l = lm(time ~ rows, data = t, weights=1/rows)
+model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
+model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
+drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
+```
+
+```{r}
+summary(model_l) # summary of the model with lowest BIC
 ```
 
 
 ```{r}
 t = df_times %>% filter(method == 'KMeans_arma')
-model = lm(time ~ rows + rows_squared, data = t)
-summary(model)
+model_l = lm(time ~ rows, data = t, weights=1/rows)
+model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
+model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
+drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
+```
+
+```{r}
+summary(model_l) # summary of the model with lowest BIC
 ```
 
 # Centroids vs Medoids
@@ -876,7 +948,7 @@ pca_mr["y_6KM"] = predict(kmeans_mr, newdata = pca_mr_no_lbl)
 plot(x=pca_mr$X1, y=pca_mr$X2, col=pca_mr$y_6KM + 2)
 plot_points(centroids_mr, num_points=1)
 points(kmeans_mr$centroids, pch="X", cex=2, col="grey40")
-legend("topleft", c("healthy"), fill=c("turquoise1"), border="black")
+legend("topleft", c("edible"), fill=c("turquoise1"), border="black")
 }
 
 unique(colors_ibs)
@@ -885,7 +957,7 @@ unique(colors_ibs)
 
 ## Soybean
 
-*soybean* contains a dataset about soybeans characteristics from UCI machine learning repository. 
+It is a dataset on soybeans characteristics from the UCI machine learning repository. 
 
 There are both categorical and ordinal values, encoded by integers. Missing values were imputated using the mice package.
 
@@ -909,7 +981,6 @@ In the following a 2d PCA for the entire dataset: one color for each different c
 
 ```{r}
 
-
 X = soybean[, -1]
 
 y = as.numeric(soybean$class)            
@@ -923,7 +994,8 @@ plot(pca_dat, col=y)
 
 ```
 
-We can see that there is no obvious 2d clustering that well separates the labels. There are some denser region with the same color. 
+We can see that there is no obvious 2d clustering that well separates the labels. 
+There are some denser regions.
 
 
 
