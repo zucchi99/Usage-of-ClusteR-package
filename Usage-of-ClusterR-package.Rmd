@@ -23,7 +23,7 @@ source("functions.R")
 # Introduction
 
 ClusterR is an R package for clustering data.
-It contains some built-in functions for K-Means/Medoids and Gaussian Mixture Models.
+It contains some built-in functions for K-Means and Gaussian Mixture Models.
 
 Documentation can be found at https://cran.r-project.org/web/packages/ClusterR/.
 
@@ -34,30 +34,30 @@ Statistical learning problems can be divided in two main categories: supervised 
 They both aim to extract information from a set of observations $x_i$, with $1 \leq i \leq n$.
 Each $x_i$ is a vector of $p$ predictor variables.
 
-The supervised framework assumes to have as input also the associated response $y_i$ for each corresponding $x_i$.
+The supervised framework assumes to have in input also the associated response $y_i$ foreach corresponding $x_i$.
 A classical example of supervised learning is the logistic regression.
 
-The unsupervised learning instead relies only on the observations $x_i$ without any associated response $y_i$.
-Since we do not have $y_i$, we cannot apply any type of checks or optimizations on the
+The unsupervised learning instead relies only on the observations $x_i$, without any associated response $y_i$.
+So, since we do not have $y_i$ we cannot apply any type of checks on the
 error between real and predicted values for the response variable.
 
-We can state that given $X_1, ..., X_p$ variables the goal is to discover 
+So, we can state that given $X_1, ..., X_p$ variables the goal is to discover 
 any type of correlation or pattern between the variables.
 In the unsupervised framework, the most known class of methods is the Cluster Analysis.
 
 # Cluster Analysis
 
 Clustering is the task of dividing the population or data points into a
-number of groups such that data points in the same groups are
+number of groups such that data points in the same groups are more
 similar to other data points in the same group and dissimilar to the
-data points in other groups. Basically, it is a collection of objects on
-the basis of similarity.
+data points in other groups. It is basically a collection of objects on
+the basis of similarity and dissimilarity between them.
 
 Clustering is suitable for explaining the
-possible data-generating process, for finding possible relations/hierarchies 
-between data or as a part of the exploratory data analysis.
+possible data-generating process, for finding possible relations or
+hierarchies between data or as a part of the exploratory data analysis.
 
-For doing clustering it is necessary to define a measure of similarity:
+For doing clustering is necessary to define a measure of similarity:
 similar items should belong to the same group. A measure of similarity
 must be non-negative, symmetric and must have a value of zero only if
 the items are equal. There are various possible similarity measures, for
@@ -80,7 +80,7 @@ There are four main approaches in clustering:
 
 Connectivity-based clustering tries to create connections between the
 clusters. In this way the algorithm creates a tree (or a forest), which
-gives an hierarchial view of the data. Two possible uses can be
+can gives an hierarchial view of the data. Two possible uses can be
 creating a cause-effect relationship between items or reconstructing a
 possible evolution of a population.
 
@@ -91,23 +91,22 @@ Algorithms in this class: Agglomerative (Divisive) Hierarchical Clustering.
 Centroid-based clustering is based on centroids: each item belongs to
 the class of its nearest centroid. The centroids can be restricted to
 locations of the items (medoid) or generic points (centroid). The number
-of centroids can be hard-coded or optimized by the algorithm; the
-positions of the centroids is always optimized by the algorithm. 
+of centroids can be hard-coded or searched by the algorithm; the
+position of the centroids is optimized by the algorithm. 
 
 Algorithms in this class: K-Means, K-Medoids.
 
 ### K-means and K-medoids
 
-K-means initially creates k random points which represent the
+K-means initially creates k random points which represents the
 centroids. Then, for each iteration, the algorithm moves the centroid
-positions to optimize the clustering metric. The k-medoid algorithm is a
-variation of k-means, which changes the way to calculate the new center of each cluster:
+positions to optimize the clustering. The k-medoid algorithms is a
+variation of k-means, which changes the way to calculate the center of each cluster:
 
  - **k-means**: uses the mean of all its points (which is not necessarily a point of the cluster)
-   * pros: algorithms are linear in time complexity
+   * pros: center of the cluster coincides with the mean point over all its coordinates
  - **k-medoids** uses the median point of the cluster (so a point of the cluster)
-   * pros: is less influenced by noise and outliers.
-   * cons: algorithms are quadratic in time complexity
+   * pros: center of the cluster coincides is not influenced by noise or outliers.
    
  
 ## Distribution based 
@@ -123,11 +122,11 @@ Algorithms in this class: Gaussian Mixture Models.
 
 The most known and effective distribution-based algorithm is GMM.
 GMM models the data-generating process as a set of
-gaussian distributions, one for each cluster. Doing so, each gaussian (cluster)
+gaussian models, one for each cluster. Doing so, each gaussian (cluster)
 gives the probability density function of the points it generates. 
-During inference/prediction, a point point is assigned to the cluster that maximizes the probability.
+A point belongs to the cluster that maximized the probability of generating it there.
 
-GMM can be seen as an extension of the K-means, which assumes 
+The GMM can be seen as an extension of the K-means, which assumes 
 that the clusters are non-overlapping and have a circular shape.
 GMM instead is effective also if the first assumption does not hold 
 and the second is relaxed, requesting an ellipsoidal shape.
@@ -138,10 +137,10 @@ The goal is to estimate the parameter $\theta_k = (\mu_k, \Sigma_k, \pi_k)$, whe
 
  - **mean $\mu_k$**: defines the center
  - **covariance matrix $\Sigma_k$**: defines the width
- - **weight $\pi_k$**: defines the weight in percentage of each component ($\pi_k$ is a probability itself, so: $\Sigma_{i=1}^K \pi_i = 1$)
+ - **"size" $\pi_k$**: defines how big the function will be ($\pi_k$ is a probability itself, so: $\Sigma_{i=1}^K \pi_i = 1$)
 
-To discover the above parameters, Expectation-Maximization (EM) Algorithm is used.
-Basically, is based on two alternating steps:
+To discover the above parameters, is used the Expectation-Maximization (EM) Algorithm.
+Basically, is based on two steps which alternates each other:
 
  - **Expectation**: computes the posterior probabilities
  - **Maximization**: updates the parameters given the newly computed posterior
@@ -149,9 +148,10 @@ Basically, is based on two alternating steps:
 ## Density based
 
 Density-based clustering groups data using distance between points.
-Dense connected regions of points should be part of the same cluster. 
-In this way there is not a fixed number of clusters, but the number of
-clusters depends on the data distribution and the chosen density threshold. 
+Dense connected regions of points should be part of the same cluster. In
+this way there is not a fixed number of clusters, but the number of
+clusters depends on how many different regions of data points are there
+and on the chosen density threshold. 
 
 Algorithms in this class: DBSCAN, OPTICS.
 
@@ -160,7 +160,7 @@ Algorithms in this class: DBSCAN, OPTICS.
 
 To test the various cluster algorithms first of all we need some data.
 We have created a synthetic dataset drawn
-from $k=3$ different 2-dimensional gaussian distributions (so $d=2$).
+from $k=3$ different 2-dimensional gaussians (so $d=2$).
 
 To do it we used the library MASS, which defines the function \verb|mvrnorm|:
 specifying the number $n$ of samples, the mean $\mu \in \mathbb{R}^d$ and the correlation matrix 
@@ -168,9 +168,9 @@ $\Sigma \in \mathbb{R}^{d*d}$, it returns a matrix
 representing $n$ observations $x_1, ... , x_n$, with each $x_i \in \mathbb{R}^d$ 
 generated from a simulation of a Multivariate Normal Distribution.
 
-We generated and combined three matrices (one for each gaussian generating process) into a single dataframe, where the column "color" specifies the generating distribution.
+We generated and combined three matrixes (one for each gaussian generating process) into a single dataframe, where the column "color" specifies the true class for each point.
 
-Finally, we visualized the data using a scatter plot,
+Finally, we visualized the data using a scatterplot,
 where the digits indicate the positions of the centroids.
 
 ```{r include=FALSE}
@@ -214,8 +214,8 @@ It also contains some helper functions and example datasets.
 The package is subdivided in different parts: 
 
 * clustering algorithms
-* searching the optimal number of clusters
-* prediction using the generated clusterings
+* search of the optimal number of clusters
+* prediction using the generated clusters 
 * visualization of the clustering goodness with 2D scatterplots and silouhette dissimilarity plots 
 * validation of the clustering goodness using ground truth labels
 * helper methods
@@ -259,14 +259,7 @@ It is also possible to use the function \verb|plot_2d|, defined by by the Cluste
 plot_2d(data = df1_no_label, clusters = df1$y_3gmm, centroids_medoids = gmm_3$centroids)
 ```
 
-
-<!-- bug in knit does not show plot, add image manually: -->
-
-```{r echo = FALSE, message=FALSE, fig.align='center', out.width='0.9\\linewidth', fig.pos='H'}
-knitr::include_graphics("./images/plot_2d.png")
-```
-
-
+<!-- todo add plot_2d output manually -->
 
 The function \verb|external_validation|, also defined in the ClusterR package, gives us the possibility to extract some useful metrics measuring the goodness of the fit. It requires only the predicted values and annotated values. 
 
@@ -284,9 +277,9 @@ The GMM object returned by the function is a list with 5 components:
 
 - **centroids**: a matrix $\in \mathbb{R}^{k*d}$ that specifies the position of each centroid
 - **covariance_matrices**: a matrix $\in \mathbb{R}^{k*d}$ that specifies the diagonal values of each covariance matrix
-- **weights** a vector $\in \mathbb{R}^{k}$, with the percentage of weight of each gaussian component
+- **weights** a vector $\in \mathbb{R}^{k}$ for each gaussian component (list)
 - **Log_likelihood**: a matrix $\in \mathbb{R}^{n*k}$ foreach training item
-- **call**: a list containing the values of the parameters used in the invocation
+- **call**: a list containing the values of the parameters used in the invokation
 
 ```{r}
 gmm_3$centroids
@@ -340,13 +333,13 @@ The \verb|KMeans_rcpp| object returned by the function is a list with 8 componen
 
 - **call**, **centroids**: as for the \verb|GMM|
 - **clusters**: a vector of $n$ elements with the predicted cluster foreach item
-- **best_initialization**: an integer indicating which was the best initialization (useful when $num\_init > 1$)
+- **best_initialization**: an integer indicating which was the best initialization (useful when $num_init > 1$)
 - some metrics: **total_SSE** (squared distance of each point to its centroid), **WCSS_per_cluster**, **obs_per_cluster** (counts items predicted per cluster)
 
 
 Although \verb|KMeans_arma| is less flexible and has a more *ready-to-go* approach, it is faster than KMeans_rcpp since:
 
- - it is lighter, it returns just the matrix of the centroids
+ - it is slighter, it returns just the matrix of the centroids
  - can work in parallel thanks to its implementation with OpenMP (if enabled).
  
 In the following the result of KMeans_rcpp with $k=3$.
@@ -496,15 +489,15 @@ points(kmedoids_pam$medoids, pch="X", cex=2, col="azure")
 A non-simple question is how to find the optimal number of centroids? 
 Plotting the data with colors works only for small datasets representable in two dimensions. 
 
-In the package there is, for each clustering algorithm, a function that iterates over $k$ to find the best fit: \verb|Optimal_Clusters_GMM|, \verb|Optimal_Clusters_KMeans| and \verb|Optimal_Clusters_Medoids|. They look for a $k \in \{1,2,..,max\_clusters\}$, where $max\_clusters$ is a fixed parameter.
+In the package there is, foreach method, a method that iterates over $k$ to find the best fit: \verb|Optimal_Clusters_GMM|, \verb|Optimal_Clusters_KMeans| and \verb|Optimal_Clusters_Medoids|. They look for a $k \in \{1,2,..,max\_clusters\}$, where $max\_clusters$ is a fixed parameter.
 
-Two common criterions to evaluate a model are **AIC (Alkaine Information Criterion)** and **BIC (Bayes Information Criterion)**. A rule of thumb is that we should select the smallest (simplest) model with good performances, so the best model should be the one which minimizes one of these criterions. 
+A criterion to evaluate a model can be either **AIC (Alkaine Information Criterion)** or **BIC (Bayes Information Criterion)**. A rule of thumb is that we should select the smallest (simplest) model with good performances, so the best model should be the one which minimizes one of these criterions. 
 
 
 ### Elbow Method
 The elbow method is a well-known heuristic method used to determine the number of clusters. 
 Given the plot with on the y-axis a metric (AIC, BIC, etc) and on the x-axis the number of clusters, the method consists of picking the elbow of the curve as the number of clusters to use. 
-The idea is that the *elbow* can be seen as a **cutoff point** which means that choosing a greater number of clusters would increase the complexity not giving much better modeling of the data.
+The idea is that the *elbow* can be seen as a **cutoff point** which means that choosing a number of clusters greater than it would not give much better modeling of the data.
 The Elbow Method is pretty simple but can used effectively only when the curve has a clear point where the improvement does not highly increase any more, which can not always be the case.
 
 In the example, we can see that a model with 3 clusters should be fine, because after this value the BIC stops decreasing sharply. 
@@ -517,11 +510,8 @@ opt_gmm = Optimal_Clusters_GMM(df1_no_label, max_clusters = 10, criterion = "BIC
     dist_mode = "eucl_dist", seed_mode = "random_subset", plot_data = T)
 ```
 
-<!-- bug in knit does not show plot, add Optimal_Clusters_GMM image manually: -->
+<!-- todo add Optimal_Clusters_GMM output manually -->
 
-```{r echo = FALSE, message=FALSE, fig.align='center', out.width='0.9\\linewidth', fig.pos='H'}
-knitr::include_graphics("./images/optimal_clusters_gmm.png")
-```
 
 ## Silhouette Dissimilarity Plot
 
@@ -541,37 +531,23 @@ In the package there is the function \verb|Silhouette_Dissimilarity_Plot|, which
 invisible(Silhouette_Dissimilarity_Plot(kmedoids_pam, silhouette = TRUE))
 ```
 
-<!-- bug in knit does not show plot, add image manually: -->
-
-```{r echo = FALSE, message=FALSE, fig.align='center', out.width='0.9\\linewidth', fig.pos='H'}
-knitr::include_graphics("./images/silhouette_plot_T.png")
-```
-
-
 ```{r}
 invisible(Silhouette_Dissimilarity_Plot(kmedoids_pam, silhouette = FALSE))
 ```
 
-
-<!-- bug in knit does not show plot, add image manually: -->
-
-```{r echo = FALSE, message=FALSE, fig.align='center', out.width='0.9\\linewidth', fig.pos='H'}
-knitr::include_graphics("./images/silhouette_plot_F.png")
-```
-
-
+<!-- TODO add manually Silhouette_Dissimilarity_Plot -->
 
 # Methods Comparisons
 
 ## Comparisons on predictions metrics
 
-Often is useful to compare models to seek for the best and to understand the possible limitations.
+Often is useful to compare models to seek for the best, to understand which are the possible limitations of another etc.
 Given the overall statistics of the different algorithms launched with the different parameters, 
 it's pretty simple to build a dataframe the contains all of them, by just executing the
-\verb|external_validation| function for each metric desired and for each algorithm.
+\verb|external_validation| function foreach metric desired and foreach algorithm.
 This is exactly what the function \verb|compare_metrics| does, note that we implemented that,
 it is not present in the package.
-Besides to the printing of the dataframe, we can displayed various bar plots.
+Besides to the printing of the dataframe, we can also see the various barplots.
 From the charts we can easily see how the performance are more or less equal between them, 
 except -as expected- the 2-dimensional GMM.
 
@@ -622,10 +598,10 @@ for (r in 1:rows) {
 ## Comparisons on execution time
 
 Finally, some some tests were run to compare the execution time of the various algorithms, with an increasing number of elements: from 100 to 2 millions.
-Note that, not all of the algorithms were executed with all sizes, since some of them are designed only for small or medium size datasets (they would take too long for the biggest test cases).
+Note that, not all of the algorithms were executed with all sizes, since some of them are designed only for small or medium size datasets.
 The data was generated with a uniform distribution on 10 different variables.
 Although both \verb|Clara_Medoids| and \verb|KMeans_arma| can work in parallel, it was decided to run all the algorithms in the sequentially mode. The code for the generation is available in the file *"clustering_exec_times.R"*, here we import directly the csv with the results.
-Note also that the \verb|Clara_Medoids| is impacted from the choice of sampling's parameters, and we opted for 2 samplings with 5% each.
+Note also that the \verb|Clara_Medoids| will be impacted from the choice of sampling's parameters, and we opted for 2 samplings with 5% each.
 
 ```{r}
 df_times = read.csv("clustering_exec_times.csv")
@@ -639,20 +615,37 @@ legend("top", unique(df_times$method), fill=unique(df_times$color),
        border="black", ncol=3, cex = 1)
 }
 ```
-Since the visualization of the results is quite difficult in the linear scale, below is given the plot in the log-log scale.
+Since the visualization of the results is quite difficult in the normal scale, below is given the plot in the log-log scale.
 
 ```{r}
 {
-plot(log10(time) ~ log10(rows), data=df_times, col=color, xlim = get_borders(log10(rows)), 
-     ylim = get_borders(log10(time), max_pct=0.4))
+plot(log(time) ~ log(rows), data=df_times, col=color, xlim = get_borders(log(rows)), 
+     ylim = get_borders(log(time), max_pct=0.4))
 legend("top", unique(df_times$method), fill=unique(df_times$color), 
        border="black", ncol=3)
 }
 ```
 
-From the chart we can rank the algorithms by execution time.
+From the chart is clear how a ranking on the execution times of the methods would look like.
+Moreover, we derived the approximate numbers of rows clustered in 1 second per each method, which are the following (ordered from the slower to the faster):
 
-From the linearly-scaled plot there is also a strong evidence that all the methods, apart the medoids-based excluded, have a linear complexity.
+```{r include=FALSE}
+effiency_df = as.matrix(rbind(
+    c("Cluster_Medoids", 5 * 10^2),
+    c("KMeans_rcpp", 5 * 10^3),
+    c("GMM", 5 * 10^5),
+    c("MiniBatchKMeans", 5 * 10^5),
+    c("KMeans_arma", 10^6)
+))
+colnames(effiency_df) <- c("method", "rows/s")
+```
+
+```{r}
+effiency_df
+```
+
+
+From the normal-scaled plot there is also a strong evidence that all the methods, apart the medoids-based excluded, have a linear complexity.
 The medoids algorithms instead are very slow. Since they both calculate the dissimilarity matrix, they should have a complexity (at least) quadratic.
 Of course, the \verb|Cluster_Medoids| is slower since the matrix is calculated for all observations ($n^2$), meanwhile the \verb|Clara_Medoids| only for the ones sampled (in our case $\leq (2*0.05*n)^2$).
 From the first plot it is not clear if a quadratic curve is present, because all the points are shrinked.
@@ -672,117 +665,12 @@ with(medoids_df[medoids_df$color==2,], lines(lowess(rows, time), col=2))
 
 From the above chart is clear that the experimental results confirm the non-linearity expectations.
 
-### Linear Models
-
-At this point, for each method three possible linear models were considered: linear (**model_l**, only *rows*), quadratic (**model_q**, only *rows_squared*), sum of both  (**model_lq**, *rows* + *rows_squared*).
-The model **model_lq** has the following form: $time = a_1 rows + a_2 rows^2 + a_3$.
-The auxiliary variable $rows^2$, or \verb|rows_squared|, is pre-computed for the entire dataset before the model fitting. 
-
-For brevity we will avoid to print for all the methods the summary of each model.
-We will just choose the best model using \verb|BIC| calculated with the \verb|drop1| and then check the best model with the summary. 
-Note that to calculate the \verb|BIC| instead of the \verb|AIC| is necessary to set $k=log(n)$ in the parameters of the \verb|drop1|.
-
-From the theory and visually from the plots we expect the medoids algorithms to be quadratic, and the other ones to be linear.
-
-```{r}
-df_times$rows_squared = df_times$rows ^ 2
-```
-
-We can see from that \verb|Cluster_Medoids| execution time goes with squared complexity. 
-
-```{r}
-t = df_times %>% filter(method == 'Cluster_Medoids')
-model_l = lm(time ~ rows, data = t, weights=1/rows)
-model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
-model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
-drop1(model_lq)  # drop1: linear vs quadratic vs both
-```
-
-```{r}
-summary(model_q) # summary of the model with lowest BIC
-```
-
-Also \verb|Clara_Medoids| execution time goes with the square of the number of rows, but with a much smaller constant than \verb|Cluster_Medoids|. 
-
-```{r}
-t = df_times %>% filter(method == 'Clara_Medoids')
-model_l = lm(time ~ rows, data = t, weights=1/rows)
-model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
-model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
-drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
-```
-
-```{r}
-summary(model_q) # summary of the model with lowest BIC
-```
-
-\verb|KMeans_rcpp|, \verb|GMM|, \verb|MiniBatchKmeans| and \verb|KMeans_arma| execution times are linear in the input size:
-
-```{r}
-t = df_times %>% filter(method == 'KMeans_rcpp')
-model_l = lm(time ~ rows, data = t, weights=1/rows)
-model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
-model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
-drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
-```
-
-Since the **model_lq** seems not bad, we also show its coefficients, the quadratic one is so small that in fact can be removed in favor of a simpler model without it.
-
-```{r}
-model_lq$coefficients # check coefficient values of LQ
-```
-
-The **model_l** seems totally fine:
-
-```{r}
-summary(model_l) # summary of the model with lowest BIC
-```
-Same considerations apply to the others methods as well:
-
-```{r}
-t = df_times %>% filter(method == 'GMM')
-model_l = lm(time ~ rows, data = t, weights=1/rows)
-model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
-model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
-drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
-```
-
-```{r}
-summary(model_l) # summary of the model with lowest BIC
-```
-
-
-```{r}
-t = df_times %>% filter(method == 'MiniBatchKmeans')
-model_l = lm(time ~ rows, data = t, weights=1/rows)
-model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
-model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
-drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
-```
-
-```{r}
-summary(model_l) # summary of the model with lowest BIC
-```
-
-
-```{r}
-t = df_times %>% filter(method == 'KMeans_arma')
-model_l = lm(time ~ rows, data = t, weights=1/rows)
-model_q = lm(time ~ rows_squared, data = t, weights=1/rows)
-model_lq = lm(time ~ rows + I(rows_squared), data = t, weights=1/rows)
-drop1(model_lq, k=log(length(df_times$rows)))  #drop1: linear vs quadratic vs both
-```
-
-```{r}
-summary(model_l) # summary of the model with lowest BIC
-```
-
 # Centroids vs Medoids
 
-Last but not least, we wanted to highlight the different behavior between centroid-based and medoid-based algorithms.
+Last but not least, we wanted to highlight the different behaviour between centroid-based and medoid-based algorithms.
 In order to so, we created a very small dataset with just 10 random elements on 2-dimensional space.
 The elements are just random (from a normal distribution in $[0,1]$) so the outcomes of the two methods could be totally different.
-One thing there for sure will emerge is that the centroids will be placed in the middle of each cluster, meanwhile the medoids will be constrained to be on top of the items, but probably not really in median point.
+One thing there for sure will emerge is that the centroids will be placed in the middle of each cluster, meanwhile the medoids will be constrained to be one of the elements of the dataset, but probably not really a median point.
 
 Watching the plot below, looking for clusters seems not a great idea.
 
@@ -836,17 +724,22 @@ In the package there are also 3 different datasets:
 
 **Dietary Survey IBS** contains synthetic data generated using the mean and standard deviation of data used in the paper *"A dietary survey of patients with irritable bowel syndrome"*.
 
-```{r}
-data(dietary_survey_IBS)
+```{r eval=FALSE, include=FALSE}
+help(dietary_survey_IBS)
+table(dietary_survey_IBS$class)
 dim(dietary_survey_IBS)
-colnames(dietary_survey_IBS)
-summary(dietary_survey_IBS$class)
+head(dietary_survey_IBS)
 ```
 
 It contains 400 rows and 43 columns where
 
  - *class* is the binary predictor variable, divided in half: 200 healthy ($class=0$) and 200 IBS-positive  ($class=1$). 
  - the other 42 columns are the numeric predictor variables and they are all continuous
+
+```{r}
+data(dietary_survey_IBS)
+colnames(dietary_survey_IBS)
+```
 
 We reduced the dataset into just 2D using the PCA. 
 Although we brutally decreased the dimensions, the samples of the two classes are still divided into two quite distinct clusters, as visible in the plot:
@@ -907,13 +800,14 @@ It contains 8124 rows and 23 columns:
  - the other 22 columns contain one character each and can be used as predictors
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 dim(mushroom)
 colnames(mushroom)
-summary(mushroom$class)
+unique(mushroom$class)
+head(mushroom)
 ```
 
-In the following a 2D PCA on the entire dataset is applied. blue is for class 0 (edible) and green is for class 1 (poisonous). 
+In the following a 2D PCA on the entire dataset is applied. black class 0 (edible) and red for class 1 (poisonous). 
 
 ```{r}
 data(mushroom)
@@ -948,18 +842,21 @@ pca_mr["y_6KM"] = predict(kmeans_mr, newdata = pca_mr_no_lbl)
 plot(x=pca_mr$X1, y=pca_mr$X2, col=pca_mr$y_6KM + 2)
 plot_points(centroids_mr, num_points=1)
 points(kmeans_mr$centroids, pch="X", cex=2, col="grey40")
-legend("topleft", c("edible"), fill=c("turquoise1"), border="black")
+legend("topleft", c("healthy", "IBS-positive"), fill=unique(colors_ibs), border="black")
 }
-
-unique(colors_ibs)
 ```
 
 
 ## Soybean
 
-It is a dataset on soybeans characteristics from the UCI machine learning repository. 
+*soybean* contains a dataset about soybeans characteristics from UCI machine learning repository. 
 
 There are both categorical and ordinal values, encoded by integers. Missing values were imputated using the mice package.
+
+
+```{r}
+help(soybean)
+```
 
 It contains 307 rows and 36 columns. 
 
@@ -973,17 +870,19 @@ dim(soybean)
 
 colnames(soybean)
 
-summary(soybean$class)
+unique(soybean$class)
 
+head(soybean)
 ```
 
 In the following a 2d PCA for the entire dataset: one color for each different class. 
 
 ```{r}
 
+
 X = soybean[, -1]
 
-y = as.numeric(soybean$class)            
+y = as.numeric(soybean[, 1])            
 
 gwd = FD::gowdis(X)           
 
@@ -994,8 +893,7 @@ plot(pca_dat, col=y)
 
 ```
 
-We can see that there is no obvious 2d clustering that well separates the labels. 
-There are some denser regions.
+
 
 
 
