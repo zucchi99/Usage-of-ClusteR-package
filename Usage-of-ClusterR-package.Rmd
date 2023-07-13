@@ -796,7 +796,7 @@ help(mushroom)
 
 It contains 8124 rows and 23 columns:
 
- - *"class"* is the target column. Its values are "p" and "e", with "p" meaning poisonous (or unknown), int the 52% of the asmples, and "e" meaning "edible", in the remaining 48%
+ - *"class"* is the target column. Its values are "p" and "e", with "p" meaning poisonous (or unknown), int the 52% of the samples, and "e" meaning "edible", in the remaining 48%
  - the other 22 columns contain one character each and can be used as predictors
 
 
@@ -842,7 +842,7 @@ pca_mr["y_6KM"] = predict(kmeans_mr, newdata = pca_mr_no_lbl)
 plot(x=pca_mr$X1, y=pca_mr$X2, col=pca_mr$y_6KM + 2)
 plot_points(centroids_mr, num_points=1)
 points(kmeans_mr$centroids, pch="X", cex=2, col="grey40")
-legend("topleft", c("healthy", "IBS-positive"), fill=unique(colors_ibs), border="black")
+legend("topleft", c("poisonous"), fill=c(5), border="black")
 }
 ```
 
